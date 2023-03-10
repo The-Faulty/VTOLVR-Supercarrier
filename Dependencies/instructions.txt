@@ -4,3 +4,4 @@ Dependencies Needed
 	UnityEngine.CoreModule.dll
 	UnityEngine.dll
 	UnityEngine.UI.dll
+	UnityEngine.AssetBundleModule.dll

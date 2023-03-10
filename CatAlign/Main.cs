@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Harmony;
 using System.Reflection;
+using System.IO;
 
 namespace CatAlign
 {
@@ -15,6 +16,7 @@ namespace CatAlign
   {
     //public CarrierCatapult playerCat;
     private bool patched = false;
+
     // This method is run once, when the Mod Loader is done initialising this game object
     public override void ModLoaded()
     {
@@ -25,9 +27,26 @@ namespace CatAlign
         harmony.PatchAll(Assembly.GetExecutingAssembly());
         patched = true;
         Debug.Log("Align has been patched");
+        StartCoroutine(loadIndicatorAsync());
       }
       //VTOLAPI.SceneLoaded += SceneLoaded;
       base.ModLoaded();
+    }
+
+    private IEnumerator loadIndicatorAsync() //thank you NotBDArmory github
+    {
+      AssetBundleCreateRequest a = AssetBundle.LoadFromFileAsync(ModFolder + "/align.assets");
+      yield return a;
+      AssetBundle bundle = a.assetBundle;
+      AssetBundleRequest handler = bundle.LoadAssetAsync("AlignmentIndicator.prefab");
+      yield return handler;
+      if (handler.asset == null)
+      {
+        Debug.Log("Couldn't find alignment indicator");
+      }
+      //0.13, 0.575, 6.125
+      //25,0,0
+      yield break;
     }
 
     //This method is called every frame by Unity. Here you'll probably put most of your code
@@ -41,34 +60,12 @@ namespace CatAlign
 
     }
 
-    //This function is called every time a scene is loaded. this behaviour is defined in Awake().
-    /*private void SceneLoaded(VTOLScenes scene)
-    {
-      //If you want something to happen in only one (or more) scenes, this is where you define it.
-
-      //For example, lets say you're making a mod which only does something in the ready room and the loading scene. This is how your code could look:
-      switch (scene)
-      {
-        case VTOLScenes.ReadyRoom:
-          //Add your ready room code here
-          break;
-        case VTOLScenes.LoadingScene:
-          //Add your loading scene code here
-          break;
-      }
-      //GameObject currentVehicle = VTOLAPI.GetPlayersVehicleGameObject();
-      //Transform hookForcePt = currentVehicle.transform.Find("LandingGear").transform.Find("hookForcePt").transform;
-    }*/
-
     public static void setPlayerCat(CarrierCatapult pc)
     {
       Debug.Log("setPlayerCat has been called");
       GameObject currentVehicle = VTOLAPI.GetPlayersVehicleGameObject();
-      Debug.Log("1");
       Transform hookForcePt = currentVehicle.transform.Find("LandingGear").transform.Find("hookForcePt").transform;
-      Debug.Log("2");
       GameObject alignIndicatorUI = currentVehicle.transform.Find("sevtf_layer_2/WingLeftPart/wingLeft/HP_5/AlignmentIndicator(Clone)/UI").gameObject;
-      Debug.Log("3");
 
       /*foreach (Transform child in alignIndicatorUI.GetComponentInChildren<Transform>())
       {
@@ -88,20 +85,12 @@ namespace CatAlign
       }*/
 
       RectTransform backgroundUI = (RectTransform)alignIndicatorUI.transform.Find("Background").transform;
-      Debug.Log("3");
       RectTransform playerUI = (RectTransform)backgroundUI.transform.Find("playerUI").transform;
-      Debug.Log("3");
 
-      Debug.Log(hookForcePt);
-      Debug.Log(pc);
-      Debug.Log(pc.transform);
       UIHandler handler = alignIndicatorUI.AddComponent<UIHandler>();
-      Debug.Log("3");
       handler.characterTarget = hookForcePt;
-      Debug.Log("3");
       handler.gameTarget = pc.transform;
 
-      Debug.Log("4");
       if (handler.characterTarget == null || handler.gameTarget == null)
       {
         Debug.Log("Could not assign target element(s)");
@@ -110,15 +99,14 @@ namespace CatAlign
       handler.backgroundUI = backgroundUI;
       handler.playerUI = playerUI;
 
-      Debug.Log("5");
       if (handler.backgroundUI == null || handler.playerUI == null)
       {
         Debug.Log("Could not assign UI element(s)");
       }
 
-      handler.angleDisplay = (Text)alignIndicatorUI.transform.Find("Info Panel").transform.Find("Angle Text").transform.Find("Angle Display").gameObject.GetComponent<Text>();
-      handler.alignDisplay = (Text)alignIndicatorUI.transform.Find("Info Panel").transform.Find("Align Text").transform.Find("Align Display").gameObject.GetComponent<Text>();
-      handler.moveDisplay = (Text)alignIndicatorUI.transform.Find("Info Panel").transform.Find("Move Text").transform.Find("Move Display").gameObject.GetComponent<Text>();
+      handler.angleDisplay = (Text)alignIndicatorUI.transform.Find("Info Panel/Angle Text/Angle Display").gameObject.GetComponent<Text>();
+      handler.alignDisplay = (Text)alignIndicatorUI.transform.Find("Info Panel/Align Text/Align Display").gameObject.GetComponent<Text>();
+      handler.moveDisplay = (Text)alignIndicatorUI.transform.Find("Info Panel/Move Text/Move Display").gameObject.GetComponent<Text>();
       if (handler.moveDisplay == null || handler.alignDisplay == null || handler.alignDisplay == null)
       {
         Debug.Log("Could not assign text element(s)");
