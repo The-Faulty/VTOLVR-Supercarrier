@@ -1,7 +1,7 @@
 {
-  "name": "CatAlign",
+  "name": "Catapult Alignment",
   "description": "Catapult Alignment Indicator",
-  "dll_file": "",
+  "dll_file": "CatAlign.dll",
   "last_edit": 638136941475089901,
   "pub_id": "",
   "json_version": "",

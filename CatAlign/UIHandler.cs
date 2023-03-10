@@ -16,19 +16,18 @@ public class UIHandler : MonoBehaviour
   public Text alignDisplay;
   public Text moveDisplay;
 
-  public bool isAssigned;
+  public bool isAssigned = true;
 
   Vector2 backgroundSize;
   Vector2 relativeDistance;
 
-  int maxDistance = 10;
+  int maxDistance = 30;
   float worldUIConversion;
   float uiOffset;
 
   float relativeAngle;
 
   bool isAligned = false;
-
 
   void Start()
   {
@@ -78,7 +77,7 @@ public class UIHandler : MonoBehaviour
     if (x > (backgroundSize.x / 2) - playerUI.rect.width / 2) x = (backgroundSize.x / 2) - (playerUI.rect.width / 2);
 
     playerUI.anchoredPosition = new Vector2(x, y);
-    playerUI.eulerAngles = new Vector3(0, 0, Vector3.SignedAngle(characterTarget.forward, gameTarget.forward, Vector3.up));
+    playerUI.localEulerAngles = new Vector3(0, 0, Vector3.SignedAngle(characterTarget.forward, gameTarget.forward, Vector3.up));
   }
 
   void checkAlign()
