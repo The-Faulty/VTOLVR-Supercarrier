@@ -5,9 +5,6 @@
 
 # VTOL VR mod dependencies
 
-Dependencies/*
-!Dependencies/instructions.txt
-
 # User-specific files
 *.rsuser
 *.suo
