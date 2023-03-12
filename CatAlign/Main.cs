@@ -9,6 +9,7 @@ using UnityEngine.UI;
 using Harmony;
 using System.Reflection;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 namespace CatAlign
 {
@@ -16,6 +17,9 @@ namespace CatAlign
   {
     //public CarrierCatapult playerCat;
     private bool patched = false;
+
+    public static GameObject AlignIndicator;
+    public static GameObject AlignIndicatorUI;
 
     // This method is run once, when the Mod Loader is done initialising this game object
     public override void ModLoaded()
@@ -35,7 +39,7 @@ namespace CatAlign
 
     private IEnumerator loadIndicatorAsync() //thank you NotBDArmory github
     {
-      AssetBundleCreateRequest a = AssetBundle.LoadFromFileAsync(ModFolder + "/align.assets");
+      AssetBundleCreateRequest a = AssetBundle.LoadFromFileAsync(ModFolder + "/alignmentindicator.assets");
       yield return a;
       AssetBundle bundle = a.assetBundle;
       AssetBundleRequest handler = bundle.LoadAssetAsync("AlignmentIndicator.prefab");
@@ -44,85 +48,75 @@ namespace CatAlign
       {
         Debug.Log("Couldn't find alignment indicator");
       }
-      //0.13, 0.575, 6.125
-      //25,0,0
+      AlignIndicator = Instantiate(handler.asset as GameObject);
+      DontDestroyOnLoad(AlignIndicator);
+      Debug.Log("Alignment Indicator loaded");
+      bundle.Unload(false);
       yield break;
-    }
-
-    //This method is called every frame by Unity. Here you'll probably put most of your code
-    void Update()
-    {
-    }
-
-    //This method is like update but it's framerate independent. This means it gets called at a set time interval instead of every frame. This is useful for physics calculations
-    void FixedUpdate()
-    {
-
     }
 
     public static void setPlayerCat(CarrierCatapult pc)
     {
       Debug.Log("setPlayerCat has been called");
       GameObject currentVehicle = VTOLAPI.GetPlayersVehicleGameObject();
-      Transform hookForcePt = currentVehicle.transform.Find("LandingGear").transform.Find("hookForcePt").transform;
-      GameObject alignIndicatorUI = currentVehicle.transform.Find("sevtf_layer_2/WingLeftPart/wingLeft/HP_5/AlignmentIndicator(Clone)/UI").gameObject;
 
-      /*foreach (Transform child in alignIndicatorUI.GetComponentInChildren<Transform>())
+      Debug.Log(currentVehicle);
+      Debug.Log(currentVehicle.name);
+      if (currentVehicle.name.Equals("SEVTF(Clone)"))
       {
-        Debug.Log(child);
-        foreach (Transform c in child.GetComponentInChildren<Transform>())
+        Transform hookForcePt = currentVehicle.transform.Find("LandingGear").transform.Find("hookForcePt").transform;
+        Debug.Log("Help me im dying");
+        Debug.Log(AlignIndicator);
+        if (currentVehicle.transform.Find(AlignIndicator.name) == null)
         {
-          Debug.Log(c);
-          foreach (Transform ch in c.GetComponentInChildren<Transform>())
-          {
-            Debug.Log(ch);
-            foreach (Transform chi in ch.GetComponentInChildren<Transform>())
-            {
-              Debug.Log(chi);
-            }
-          }
+          Debug.Log("Alignment Indicator not found in vehicle");
+          AlignIndicator.transform.parent = currentVehicle.transform;
+          AlignIndicator.transform.localPosition = new Vector3(0.125f, 0.575f, 6.125f);
+          AlignIndicator.transform.localEulerAngles = new Vector3(25, 0, 0);
+          AlignIndicatorUI = AlignIndicator.transform.Find("UI").gameObject;
+          AlignIndicatorUI.AddComponent<UIHandler>();
         }
-      }*/
+        Debug.Log("Oh god, please, it hurts");
+        AlignIndicator.SetActive(true);
 
-      RectTransform backgroundUI = (RectTransform)alignIndicatorUI.transform.Find("Background").transform;
-      RectTransform playerUI = (RectTransform)backgroundUI.transform.Find("playerUI").transform;
+        RectTransform backgroundUI = (RectTransform)AlignIndicatorUI.transform.Find("Background").transform;
+        RectTransform playerUI = (RectTransform)backgroundUI.transform.Find("playerUI").transform;
 
-      UIHandler handler = alignIndicatorUI.AddComponent<UIHandler>();
-      handler.characterTarget = hookForcePt;
-      handler.gameTarget = pc.transform;
+        UIHandler handler = AlignIndicatorUI.GetComponent<UIHandler>();
+        handler.characterTarget = hookForcePt;
+        handler.gameTarget = pc.transform;
 
-      if (handler.characterTarget == null || handler.gameTarget == null)
-      {
-        Debug.Log("Could not assign target element(s)");
+        if (handler.characterTarget == null || handler.gameTarget == null)
+        {
+          Debug.Log("Could not assign target element(s)");
+        }
+
+        handler.backgroundUI = backgroundUI;
+        handler.playerUI = playerUI;
+
+        if (handler.backgroundUI == null || handler.playerUI == null)
+        {
+          Debug.Log("Could not assign UI element(s)");
+        }
+
+        handler.angleDisplay = (Text)AlignIndicatorUI.transform.Find("Info Panel/Angle Text/Angle Display").gameObject.GetComponent<Text>();
+        handler.alignDisplay = (Text)AlignIndicatorUI.transform.Find("Info Panel/Align Text/Align Display").gameObject.GetComponent<Text>();
+        handler.moveDisplay = (Text)AlignIndicatorUI.transform.Find("Info Panel/Move Text/Move Display").gameObject.GetComponent<Text>();
+        if (handler.moveDisplay == null || handler.alignDisplay == null || handler.alignDisplay == null)
+        {
+          Debug.Log("Could not assign text element(s)");
+        }
       }
-
-      handler.backgroundUI = backgroundUI;
-      handler.playerUI = playerUI;
-
-      if (handler.backgroundUI == null || handler.playerUI == null)
+      else
       {
-        Debug.Log("Could not assign UI element(s)");
-      }
-
-      handler.angleDisplay = (Text)alignIndicatorUI.transform.Find("Info Panel/Angle Text/Angle Display").gameObject.GetComponent<Text>();
-      handler.alignDisplay = (Text)alignIndicatorUI.transform.Find("Info Panel/Align Text/Align Display").gameObject.GetComponent<Text>();
-      handler.moveDisplay = (Text)alignIndicatorUI.transform.Find("Info Panel/Move Text/Move Display").gameObject.GetComponent<Text>();
-      if (handler.moveDisplay == null || handler.alignDisplay == null || handler.alignDisplay == null)
-      {
-        Debug.Log("Could not assign text element(s)");
+        Debug.Log("Wrong plane bozo");
       }
     }
 
     public static void afterHook()
     {
       Debug.Log("afterHook");
-      GameObject currentVehicle = VTOLAPI.GetPlayersVehicleGameObject();
-      GameObject alignIndicatorUI = currentVehicle.transform.Find("sevtf_layer_2/WingLeftPart/wingLeft/HP_5/AlignmentIndicator(Clone)/UI").gameObject;
-      if (alignIndicatorUI.GetComponent<UIHandler>() != null)
-      {
-        Debug.Log("destroying");
-        Destroy(alignIndicatorUI.GetComponent<UIHandler>());
-      }
+      AlignIndicator.SetActive(false);
     }
   }
 }

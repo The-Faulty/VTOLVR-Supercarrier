@@ -8,19 +8,18 @@ using System.Reflection;
 [HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.Hook))]
 public class ExtendCatapultLaunch
 {
-  [HarmonyPrefix]
+  /*[HarmonyPrefix]
   //public static void Prefix(ref float ___launchTime)
   public static void Prefix(CarrierCatapult __instance)
   {
     Debug.Log("Extending launch time");
-    //___launchTime = 7;
     Traverse traverse = Traverse.Create(__instance);
     if ((float)traverse.Field("launchTime").GetValue() < 10)
     {
       Debug.Log("Launch time under 10 seconds");
       traverse.Field("launchTime").SetValue(2f);
     }
-  }
+  }*/
 }
 
 //[HarmonyPatch(typeof(AirportManager), nameof(AirportManager.PlayerRequestTakeoff))]

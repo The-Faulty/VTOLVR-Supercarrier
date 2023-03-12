@@ -21,7 +21,7 @@ public class UIHandler : MonoBehaviour
   Vector2 backgroundSize;
   Vector2 relativeDistance;
 
-  int maxDistance = 30;
+  int maxDistance = 50;
   float worldUIConversion;
   float uiOffset;
 
