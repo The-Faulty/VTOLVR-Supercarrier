@@ -121,6 +121,7 @@ public class ShooterHandler : MonoBehaviour
       case (PlayerState.Wings):
         if (!Vehicle.wingFolder.deployed)
         {
+          indicator.text = "Wings";
           anim.SetBool("wings", false);
           navAgent.SetDestination(idlePoint.localPosition);
           state = PlayerState.LaunchReady;
