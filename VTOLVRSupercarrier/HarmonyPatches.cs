@@ -2,10 +2,11 @@
 using UnityEditor;
 using Harmony;
 using UnityEngine;
-using VTOLVRSuperCarrier;
+using VTOLVRSupercarrier;
 using System.Reflection;
+using System.Collections;
 
-[HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.Hook))]
+/*[HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.Hook))]
 public class ExtendCatapultLaunch
 {
   /*[HarmonyPrefix]
@@ -19,14 +20,14 @@ public class ExtendCatapultLaunch
       Debug.Log("Launch time under 10 seconds");
       traverse.Field("launchTime").SetValue(2f);
     }
-  }*/
-}
+  }
+}*/
 
 //[HarmonyPatch(typeof(AirportManager), nameof(AirportManager.PlayerRequestTakeoff))]
 [HarmonyPatch(typeof(AICarrierSpawn), nameof(AICarrierSpawn.RegisterPlayerTakeoffRequest))]
 public class AssignCatapult
 {
-  public static void Postfix(ref CarrierCatapult __result)
+  public static CarrierCatapult Postfix(ref CarrierCatapult __result)
   {
     Debug.Log("Assigning catapult");
     //Traverse traverse = Traverse.Create(__instance);
@@ -40,8 +41,19 @@ public class AssignCatapult
     {
       Debug.Log("false");
     }
+    return __result;
   }
 }
+
+[HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.ReadyRoutine))]
+public class ReadyRoutinePatch
+{
+  public static IEnumerator Postfix()
+  {
+    yield return new WaitForSeconds(3f);
+  }
+}
+
 
 //********Postfix cat launch to remove alignment script
 /*[HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.Hook))]
@@ -54,7 +66,7 @@ public class afterHooked
   }
 }*/
 
-[HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.LaunchRoutine))]
+//[HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.LaunchRoutine))]
 //Do stuff
 
 /*[HarmonyPatch(typeof(RotationToggle), nameof(RotationToggle.Toggle))]

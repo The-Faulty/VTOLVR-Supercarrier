@@ -11,7 +11,7 @@ using System.Reflection;
 using System.IO;
 using UnityEngine.SceneManagement;
 
-namespace VTOLVRSuperCarrier
+namespace VTOLVRSupercarrier
 {
   public class Main : VTOLMOD
   {
@@ -89,9 +89,7 @@ namespace VTOLVRSuperCarrier
       if (scenes == VTOLScenes.Akutan || scenes == VTOLScenes.CustomMapBase || scenes == VTOLScenes.CustomMapBase_OverCloud) // If inside of a scene that you can fly in
       {
         Debug.Log("Flight Scene");
-        StartCoroutine(getCarriers());
-         //append this to work for all carriers in scene
-
+        StartCoroutine(getCarriers()); //append this to work for all carriers in scene
       }
     }
 

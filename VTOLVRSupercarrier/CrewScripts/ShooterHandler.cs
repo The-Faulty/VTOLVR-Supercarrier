@@ -45,7 +45,6 @@ public class ShooterHandler : MonoBehaviour
   }
 
   PlayerState state;
-  // Start is called before the first frame update
   [ContextMenu("Start")]
   void Start()
   {
@@ -55,10 +54,6 @@ public class ShooterHandler : MonoBehaviour
 
   private void OnEnable()
   {
-    //navAgent.SetDestination(idlePoint.position);
-    //AlignButton.onClick.AddListener(triggered);
-    //LaunchBarButton.onClick.AddListener(BarButton);
-    //EngineButton.onClick.AddListener(RunupButton);
     foreach (Transform cat in transform.parent.parent.parent.Find("NavPoints"))
     {
       Debug.Log(cat.gameObject);
@@ -73,24 +68,6 @@ public class ShooterHandler : MonoBehaviour
   {
     Vector3 lookPos;
     Quaternion rotation;
-    if (navAgent.remainingDistance > .3)
-    {
-      if (!isWalking)
-      {
-        anim.SetBool("walk", true);
-        anim.SetBool("idle", false);
-        isWalking = true;
-      }
-    }
-    else
-    {
-      if (isWalking)
-      {
-        anim.SetBool("walk", false);
-        anim.SetBool("idle", true);
-        isWalking = false;
-      }
-    }
     switch (state)
     {
       case (PlayerState.Taxi):
@@ -121,7 +98,7 @@ public class ShooterHandler : MonoBehaviour
       case (PlayerState.Wings):
         if (!Vehicle.wingFolder.deployed)
         {
-          indicator.text = "Wings";
+          indicator.text = "";
           anim.SetBool("wings", false);
           navAgent.SetDestination(idlePoint.localPosition);
           state = PlayerState.LaunchReady;
@@ -160,32 +137,18 @@ public class ShooterHandler : MonoBehaviour
   //******make close and far for launch bar deployment
   void Align()
   {
-    //Debug.Log("Align");
     float relativeAngle = Vector2.SignedAngle(new Vector2(gameTarget.forward.x, gameTarget.forward.z), new Vector2((gameTarget.position - playerTarget.position).x, (gameTarget.position - playerTarget.position).z));
-    //Debug.Log("Relative Angle: " + relativeAngle);
     if (relativeAngle > 5)
     {
-      indicator.text = "Left";
-      //Debug.Log("left");
-      anim.SetBool("left", true);
-      anim.SetBool("right", false);
-      anim.SetBool("forward", false);
+      right();
     }
     else if (relativeAngle < -5)
     {
-      indicator.text = "Right";
-      //Debug.Log("right");
-      anim.SetBool("left", false);
-      anim.SetBool("right", true);
-      anim.SetBool("forward", false);
+      left();
     }
     else
     {
-      indicator.text = "Forward";
-      //Debug.Log("forward");
-      anim.SetBool("left", false);
-      anim.SetBool("right", false);
-      anim.SetBool("forward", true);
+      forward();
     }
     if ((gameTarget.transform.position - playerTarget.transform.position).sqrMagnitude < 1.5 && Vector3.Dot(playerTarget.transform.forward, gameTarget.forward) > 0.5f)
     {
@@ -197,6 +160,32 @@ public class ShooterHandler : MonoBehaviour
       anim.SetBool("bar", true);
       state = PlayerState.LaunchBar;
     }
+  }
+
+  void forward()
+  {
+    indicator.text = "Forward";
+    anim.SetBool("left", false);
+    anim.SetBool("right", false);
+    anim.SetBool("forward", true);
+  }
+
+  void right()
+  {
+    indicator.text = "Right";
+    //Debug.Log("right");
+    anim.SetBool("left", false);
+    anim.SetBool("right", true);
+    anim.SetBool("forward", false);
+  }
+
+  void left()
+  {
+    indicator.text = "Left";
+    //Debug.Log("left");
+    anim.SetBool("left", true);
+    anim.SetBool("right", false);
+    anim.SetBool("forward", false);
   }
 
   [ContextMenu("Trigger Align")]
@@ -238,27 +227,9 @@ public class ShooterHandler : MonoBehaviour
     AlignTrigger();
   }
 
-  [ContextMenu("Bar Trigger")]
-  void BarTrigger()
-  {
-    bar = !bar;
-  }
-
-  [ContextMenu("Wings")]
-  void WingTrigger()
-  {
-    wings = !wings;
-  }
-
-  [ContextMenu("Run Up")]
-  void RunUpTrigger()
-  {
-    engines = !engines;
-  }
-
-  [ContextMenu("Hook")]
   void onHook()
   {
+    indicator.text = "Wings";
     state = PlayerState.Wings;
   }
 }

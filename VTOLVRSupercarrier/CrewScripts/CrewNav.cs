@@ -6,6 +6,8 @@ public class CrewNav : MonoBehaviour
 {
   public Transform CharacterTransform;
 
+  public Animator anim;
+
   public float remainingDistance;
   public float MoveSpeed = 1.5f;
 
@@ -17,6 +19,7 @@ public class CrewNav : MonoBehaviour
   void Start()
   {
     MoveSpeed = 1.5f;
+    anim = GetComponent<Animator>();
   }
 
   public void SetDestination(Vector3 pos)
@@ -35,6 +38,8 @@ public class CrewNav : MonoBehaviour
     Vector3 startPos = CharacterTransform.localPosition;
     float distance = Vector3.Distance(startPos, pos);
     remainingDistance = distance;
+    anim.SetBool("walk", true);
+    anim.SetBool("idle", false);
     while (remainingDistance > 0)
     {
       //Debug.Log(remainingDistance);
@@ -47,5 +52,7 @@ public class CrewNav : MonoBehaviour
       Debug.Log(remainingDistance);
       yield return null;
     }
+    anim.SetBool("walk", false);
+    anim.SetBool("idle", true);
   }
 }
