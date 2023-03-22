@@ -45,15 +45,12 @@ public class ShooterHandler : MonoBehaviour
   }
 
   PlayerState state;
-  [ContextMenu("Start")]
-  void Start()
-  {
-    anim = GetComponent<Animator>();
-    indicator = transform.Find("DeckCrewMesh/Canvas/Text").GetComponent<Text>();
-  }
 
   private void OnEnable()
   {
+    anim = GetComponent<Animator>();
+    Debug.Log("HandlerAnim: " + anim);
+    indicator = transform.Find("DeckCrewMesh/Canvas/Text").GetComponent<Text>();
     foreach (Transform cat in transform.parent.parent.parent.Find("NavPoints"))
     {
       Debug.Log(cat.gameObject);
@@ -140,11 +137,11 @@ public class ShooterHandler : MonoBehaviour
     float relativeAngle = Vector2.SignedAngle(new Vector2(gameTarget.forward.x, gameTarget.forward.z), new Vector2((gameTarget.position - playerTarget.position).x, (gameTarget.position - playerTarget.position).z));
     if (relativeAngle > 5)
     {
-      right();
+      left();
     }
     else if (relativeAngle < -5)
     {
-      left();
+      right();
     }
     else
     {
