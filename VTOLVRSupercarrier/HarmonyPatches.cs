@@ -14,11 +14,11 @@ public class ExtendCatapultLaunch
   //public static void Prefix(ref float ___launchTime)
   public static void Prefix(CarrierCatapult __instance)
   {
-    Debug.Log("Extending launch time");
+    Log("Extending launch time");
     Traverse traverse = Traverse.Create(__instance);
     if ((float)traverse.Field("launchTime").GetValue() < 10)
     {
-      Debug.Log("Launch time under 10 seconds");
+      Log("Launch time under 10 seconds");
       traverse.Field("launchTime").SetValue(2f);
     }
   }
@@ -26,22 +26,19 @@ public class ExtendCatapultLaunch
 
 //[HarmonyPatch(typeof(AirportManager), nameof(AirportManager.PlayerRequestTakeoff))]
 [HarmonyPatch(typeof(AICarrierSpawn), nameof(AICarrierSpawn.RegisterPlayerTakeoffRequest))]
-public class AssignCatapult
+public class AICarrierSpawnPatch
 {
-  public static void Postfix(CarrierCatapult __result)
+  public static void Postfix(AICarrierSpawn __instance, CarrierCatapult __result)
   {
-    Debug.Log("Assigning catapult");
-    //Traverse traverse = Traverse.Create(__instance);
-    //if ((bool)traverse.Field("isCarrier").GetValue())
+    Debug.Log("AICarrierSpawnPatch: Assigning catapult");
     if (__result != null)
     {
-      Debug.Log("Calling setPlayerCatapult");
-      Main.setPlayerCat(__result);
-      //Main.setPlayerCat((CarrierCatapult)traverse.Field("carrierCatapult").GetValue());
+      Debug.Log("AICarrierSpawnPatch: Calling setPlayerCatapult");
+      Main.setPlayerCat(__instance, __result);
     }
     else
     {
-      Debug.Log("false");
+      Debug.Log("AICarrierSpawnPatch: No catapult returned");
     }
   }
 }
@@ -67,7 +64,7 @@ public class CarrierCatapultPatch
         ___flightInfo.PauseGCalculations();
       }
       __instance.StartCoroutine(CatapultRoutine(__instance));
-      Debug.Log("I replaced the hook function");
+      Log("I replaced the hook function");
     }
     return false;
   }
@@ -75,30 +72,31 @@ public class CarrierCatapultPatch
   private static IEnumerator CatapultRoutine(CarrierCatapult __instance)
   {
     Traverse traverse = Traverse.Create(__instance);
-    Debug.Log("CarrierCatapultNew: Begin catapult routine");
+    Log("CarrierCatapultNew: Begin catapult routine");
     traverse.Field("catapultReady").SetValue(false);
     yield return new WaitForFixedUpdate();
+
     __instance.audioSource.PlayOneShot(__instance.latchSound);
     traverse.Field("catPosition").SetValue(traverse.Field("readyPos").GetValue());
     traverse.Field("catapultTransform").Property("position").SetValue(__instance.WorldPos(traverse.Field("readyPos").GetValue<Vector3>())); //catapultTransform.position = __instance.WorldPos(readyPos);
     __instance.CreateJoint();
     FloatingOrigin.instance.AddRigidbody((Rigidbody)traverse.Field("catRb").GetValue());
-    Debug.Log("CarrierCatapultNew: Begin ReadyRoutine");
+    Log("CarrierCatapultNew: Begin ReadyRoutine");
     yield return __instance.StartCoroutine(__instance.ReadyRoutine());
-    Debug.Log("Ready Routine Over, Waiting: " + Time.time);
+
+    Log("Ready Routine Over, Waiting: " + Time.time);
     yield return CatWait(__instance, Time.time);
-    Debug.Log("Wait Over: " + Time.time);
-    Debug.Log(traverse.Field("hook").GetValue<CatapultHook>());
-    Debug.Log((bool)traverse.Field("hook").GetValue<CatapultHook>());
+    Log("Wait Over: " + Time.time);
+
     if ((bool)traverse.Field("hook").GetValue<CatapultHook>())
     {
-      Debug.Log("CarrierCatapultNew: begin LaunchRoutine");
+      Log("CarrierCatapultNew: begin LaunchRoutine");
       __instance.audioSource.PlayOneShot(__instance.launchStartSound);
       yield return __instance.LaunchRoutine();
     }
     __instance.DestroyJoint();
     yield return new WaitForSeconds(1f);
-    Debug.Log("CarrierCatapultNew: begin ReturnRoutine");
+    Log("CarrierCatapultNew: begin ReturnRoutine");
     yield return __instance.ReturnRoutine();
     traverse.Field("catapultReady").SetValue(true);
     hasCalled = false;
@@ -114,6 +112,11 @@ public class CarrierCatapultPatch
       yield return new WaitForFixedUpdate();
     }
   }
+
+  private static void Log(object text)
+  {
+    Debug.Log("CarrierCatapultPatch: " + text);
+  }
 }
 
 
@@ -123,7 +126,7 @@ public class afterHooked
 {
   public static void Postfix()
   {
-    Debug.Log("After Hooked");
+    Log("After Hooked");
     Main.afterHook();
   }
 }*/
@@ -138,7 +141,7 @@ public class wingToggle
   {
 
   }
-}*/
+}
 
 [HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.EndLaunch))]
 public class endLaunch
@@ -147,4 +150,4 @@ public class endLaunch
   {
     //Reset the shooter/crew
   }
-}
+}*/

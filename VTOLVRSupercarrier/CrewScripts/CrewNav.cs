@@ -9,7 +9,9 @@ public class CrewNav : MonoBehaviour
   public Animator anim;
 
   public float remainingDistance;
-  public float MoveSpeed = 1.5f;
+  public float JogSpeed = 3f;
+  public float WalkSpeed = 1.5f;
+
 
   public CrewNav(Transform charT)
   {
@@ -18,7 +20,10 @@ public class CrewNav : MonoBehaviour
 
   void OnEnable()
   {
-    MoveSpeed = 1.5f;
+    Log("Walk Speed - " + WalkSpeed);
+    Log("Jog Speed - " + JogSpeed);
+    WalkSpeed = 1.5f;
+    JogSpeed = 1.5f;
     anim = GetComponent<Animator>();
     Debug.Log(anim);
   }
@@ -30,19 +35,19 @@ public class CrewNav : MonoBehaviour
 
   private IEnumerator MoveToAsync(Vector3 pos)
   {
-    Debug.Log(CharacterTransform.gameObject);
-    Debug.Log(CharacterTransform);
-    Debug.Log("Move to" + pos);
+    Log(CharacterTransform.gameObject);
+    Log(CharacterTransform);
+    Log("Move to" + pos);
     
     Vector3 lookPos;
     Quaternion rotation;
     Vector3 startPos = CharacterTransform.localPosition;
-    Debug.Log(startPos);
+    Log(startPos);
     float distance = Vector3.Distance(startPos, pos);
     remainingDistance = distance;
-    Debug.Log("distance");
+    Log("distance");
     anim.SetBool("walk", true);
-    Debug.Log("walk");
+    Log("walk");
     anim.SetBool("idle", false);
     while (remainingDistance > 0)
     {
@@ -51,10 +56,21 @@ public class CrewNav : MonoBehaviour
       rotation = Quaternion.LookRotation(lookPos);
       CharacterTransform.localRotation = Quaternion.Slerp(CharacterTransform.localRotation, rotation, Time.deltaTime * 2);
       CharacterTransform.localPosition = Vector3.Lerp(startPos, pos, 1 - (remainingDistance / distance));
-      remainingDistance -= MoveSpeed * Time.deltaTime;
-      yield return null;
+      if (remainingDistance > 5)
+      {
+        remainingDistance -= JogSpeed * Time.deltaTime;
+      } else
+      {
+        remainingDistance -= WalkSpeed * Time.deltaTime;
+      }
+      yield return new WaitForFixedUpdate();
     }
     anim.SetBool("walk", false);
     anim.SetBool("idle", true);
+  }
+
+  private void Log(object text)
+  {
+    Debug.Log("CrewNav: " + text);
   }
 }

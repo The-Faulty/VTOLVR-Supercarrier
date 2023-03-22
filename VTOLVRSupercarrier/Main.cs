@@ -15,13 +15,11 @@ namespace VTOLVRSupercarrier
 {
   public class Main : VTOLMOD
   {
-    //public CarrierCatapult playerCat;
     private bool patched = false;
 
     private static List<Actor> Carriers = new List<Actor>();
 
     public static GameObject CarrierCrew;
-    private static ShooterHandler shooterHandler;
 
     // This method is run once, when the Mod Loader is done initialising this game object
     public override void ModLoaded()
@@ -32,7 +30,7 @@ namespace VTOLVRSupercarrier
         HarmonyInstance harmony = HarmonyInstance.Create("the_faulty.align");
         harmony.PatchAll(Assembly.GetExecutingAssembly());
         patched = true;
-        Debug.Log("Align has been patched");
+        Log("Align has been patched");
         StartCoroutine(loadIndicatorAsync());
       }
       VTOLAPI.SceneLoaded += SceneChanged;
@@ -48,38 +46,52 @@ namespace VTOLVRSupercarrier
       yield return handler;
       if (handler.asset == null)
       {
-        Debug.Log("Couldn't find carrier crew");
+        Log("Couldn't find carrier crew");
       }
       CarrierCrew = Instantiate(handler.asset as GameObject);
+      CarrierCrew.name = "CarrierCrew";
+      Transform Shooter = CarrierCrew.transform.Find("Crew/Shooter").transform;
+      GameObject ShooterMain = Shooter.transform.Find("DeckCrewLights").gameObject;
+
+      ShooterHandler shooterHandler = ShooterMain.AddComponent<ShooterHandler>();
+      shooterHandler.agent = Shooter;
+
+      CrewNav nav = ShooterMain.AddComponent<CrewNav>();
+      nav.CharacterTransform = Shooter;
+      shooterHandler.navAgent = nav;
+
       bundle.Unload(false);
       DontDestroyOnLoad(CarrierCrew);
-      Debug.Log(CarrierCrew);
-      Debug.Log("Carrier crew loaded");
+      Log(CarrierCrew);
+      Log("Carrier crew loaded");
+      CarrierCrew.SetActive(false);
       yield break;
     }
 
     public IEnumerator getCarriers()
     {
-      Debug.Log("getCarriers");
+      Log("getCarriers");
       TargetManager tm = TargetManager.instance;
-      Debug.Log(tm);
-      Debug.Log(tm.allActors);
-      Debug.Log(tm.alliedUnits);
-      while (tm.allActors.Count < 5) yield return null;
-      tm.allActors.ForEach(actor =>
+      while (tm.alliedUnits.Count < 5) yield return new WaitForFixedUpdate();
+      tm.alliedUnits.ForEach(actor =>
       {
-        Debug.Log("Supercarrier: " + actor);
+        Log("Supercarrier: " + actor);
         if (actor.iconType == UnitIconManager.MapIconTypes.Carrier)
         {
           Carriers.Add(actor);
-          Debug.Log("Carrier found: " + actor);
+          Log("Carrier found: " + actor);
+
+          GameObject clone = Instantiate(CarrierCrew);  //Should add crew to every carrier now
+          clone.name = "Crew";
+          clone.transform.parent = actor.gameObject.GetComponent<Transform>();
+          clone.transform.localPosition = new Vector3(-10, 23.98f, -10);
+          clone.transform.localEulerAngles = new Vector3(0, 0, 0);
+          clone.SetActive(true);
+          Log("Supercarrier: Added " + clone + " to " + actor);
         }
       });
-      Debug.Log(Carriers[0].GetComponent<Transform>());
-      CarrierCrew.transform.parent = Carriers[0].GetComponent<Transform>();
-      CarrierCrew.transform.localPosition = new Vector3(0, 23.98f, 0);
-      CarrierCrew.transform.localEulerAngles = new Vector3(0, 0, 0);
-      CarrierCrew.SetActive(true);
+      Log(Carriers[0].GetComponent<Transform>());
+      
       yield break;
     }
 
@@ -88,33 +100,35 @@ namespace VTOLVRSupercarrier
       //Carriers = null;
       if (scenes == VTOLScenes.Akutan || scenes == VTOLScenes.CustomMapBase || scenes == VTOLScenes.CustomMapBase_OverCloud) // If inside of a scene that you can fly in
       {
-        Debug.Log("Flight Scene");
-        StartCoroutine(getCarriers()); //append this to work for all carriers in scene
+        Log("Flight Scene");
+        StartCoroutine(getCarriers());
       }
     }
 
-    public static void setPlayerCat(CarrierCatapult cat)
+    public static void setPlayerCat(AICarrierSpawn instance, CarrierCatapult cat)
     {
-      //Need logic here to check which carrier the player requested from and then assign to specific deck crew
-      Debug.Log("setPlayerCat");
-      Transform Shooter = CarrierCrew.transform.Find("Crew/Shooter").transform;
-      GameObject ShooterMain = Shooter.transform.Find("DeckCrewLights").gameObject;
+      //(might be fixed) Need logic here to check which carrier the player requested from and then assign to specific deck crew
+      GameObject localCarrier = instance.gameObject;
+      Log("setPlayerCat called on " + localCarrier);
+      Transform Shooter = localCarrier.GetComponent<Transform>().Find("Crew/Shooter/DeckCrewLights").transform;
+      Log("Shooter transform " + Shooter);
+      ShooterHandler shooterHandler = Shooter.GetComponent<ShooterHandler>();
+      Log("Shooter script " + shooterHandler);
 
-      shooterHandler = ShooterMain.AddComponent<ShooterHandler>();
-      shooterHandler.agent = Shooter;
-
-      CrewNav nav = ShooterMain.AddComponent<CrewNav>();
-      nav.CharacterTransform = Shooter;
-
-      shooterHandler.navAgent = nav;
       shooterHandler.startAlign(cat, VTOLAPI.GetPlayersVehicleGameObject());
-      Debug.Log("setPlayerCat Over");
+      Log("setPlayerCat Over");
     }
 
-    public static void afterHook()
+    /*public static void afterHook()
     {
-      Debug.Log("afterHook");
+      Log("afterHook");
       //AlignIndicator.SetActive(false);
+    }*/
+
+    //Override the VTOLMOD.Log function because it doesn't work with static methods
+    private static new void Log(object text)
+    {
+      Debug.Log("VTOLVR-Supercarrier: " + text);
     }
   }
 }

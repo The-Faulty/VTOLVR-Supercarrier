@@ -49,11 +49,11 @@ public class ShooterHandler : MonoBehaviour
   private void OnEnable()
   {
     anim = GetComponent<Animator>();
-    Debug.Log("HandlerAnim: " + anim);
+    Log("HandlerAnim: " + anim);
     indicator = transform.Find("DeckCrewMesh/Canvas/Text").GetComponent<Text>();
     foreach (Transform cat in transform.parent.parent.parent.Find("NavPoints"))
     {
-      Debug.Log(cat.gameObject);
+      Log(cat.gameObject);
       Catapults.Add(cat.gameObject);
     }
     state = PlayerState.None;
@@ -81,7 +81,7 @@ public class ShooterHandler : MonoBehaviour
       case (PlayerState.LaunchBar):
         if (catHook.deployed)
         {
-          Debug.Log("Hook");
+          Log("Hook");
           state = PlayerState.Hook;
           anim.SetBool("bar", false);
 
@@ -150,7 +150,7 @@ public class ShooterHandler : MonoBehaviour
     if ((gameTarget.transform.position - playerTarget.transform.position).sqrMagnitude < 1.5 && Vector3.Dot(playerTarget.transform.forward, gameTarget.forward) > 0.5f)
     {
       indicator.text = "Bar";
-      //Debug.Log("Bar");
+      //Log("Bar");
       anim.SetBool("left", false);
       anim.SetBool("right", false);
       anim.SetBool("forward", false);
@@ -170,7 +170,7 @@ public class ShooterHandler : MonoBehaviour
   void right()
   {
     indicator.text = "Right";
-    //Debug.Log("right");
+    //Log("right");
     anim.SetBool("left", false);
     anim.SetBool("right", true);
     anim.SetBool("forward", false);
@@ -179,7 +179,7 @@ public class ShooterHandler : MonoBehaviour
   void left()
   {
     indicator.text = "Left";
-    //Debug.Log("left");
+    //Log("left");
     anim.SetBool("left", true);
     anim.SetBool("right", false);
     anim.SetBool("forward", false);
@@ -188,7 +188,7 @@ public class ShooterHandler : MonoBehaviour
   [ContextMenu("Trigger Align")]
   void AlignTrigger()
   {
-    Debug.Log("Align trigger");
+    Log("Align trigger");
     //AlignButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = "Stop Align";
     navAgent.SetDestination(alignPoint.localPosition);
     state = PlayerState.Taxi;
@@ -203,7 +203,7 @@ public class ShooterHandler : MonoBehaviour
 
   public void startAlign(CarrierCatapult cat, GameObject vehicle)
   {
-    Debug.Log("Start Align");
+    Log("Start Align");
     GameObject catNavPoints = Catapults[0]; //Catapults[cat.catapultDesignation - 1]; .getComponentsInChildren?
 
     alignPoint = catNavPoints.transform.Find("AlignPoint").transform;
@@ -218,8 +218,8 @@ public class ShooterHandler : MonoBehaviour
     playerTarget = catHook.hookForcePointTransform;
     gameTarget = playerCat.catapultTransform;
 
-    Debug.Log(playerTarget);
-    Debug.Log(gameTarget);
+    Log(playerTarget);
+    Log(gameTarget);
 
     AlignTrigger();
   }
@@ -228,5 +228,10 @@ public class ShooterHandler : MonoBehaviour
   {
     indicator.text = "Wings";
     state = PlayerState.Wings;
+  }
+
+  private void Log(object text)
+  {
+    Debug.Log("ShooterHandler: " + text);
   }
 }
