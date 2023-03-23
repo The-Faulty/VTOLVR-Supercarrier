@@ -23,7 +23,7 @@ public class CrewNav : MonoBehaviour
     Log("Walk Speed - " + WalkSpeed);
     Log("Jog Speed - " + JogSpeed);
     WalkSpeed = 1.5f;
-    JogSpeed = 1.5f;
+    JogSpeed = 3f;
     anim = GetComponent<Animator>();
     Debug.Log(anim);
   }
@@ -45,9 +45,8 @@ public class CrewNav : MonoBehaviour
     Log(startPos);
     float distance = Vector3.Distance(startPos, pos);
     remainingDistance = distance;
-    Log("distance");
+
     anim.SetBool("walk", true);
-    Log("walk");
     anim.SetBool("idle", false);
     while (remainingDistance > 0)
     {

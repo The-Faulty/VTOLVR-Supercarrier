@@ -72,19 +72,19 @@ namespace VTOLVRSupercarrier
     {
       Log("getCarriers");
       TargetManager tm = TargetManager.instance;
-      while (tm.alliedUnits.Count < 5) yield return new WaitForFixedUpdate();
+      while (tm.alliedUnits.Count < 5) yield return new WaitForSeconds(1f);
       tm.alliedUnits.ForEach(actor =>
       {
-        Log("Supercarrier: " + actor);
+        Log(actor);
         if (actor.iconType == UnitIconManager.MapIconTypes.Carrier)
         {
-          Carriers.Add(actor);
           Log("Carrier found: " + actor);
+          //Carriers.Add(actor);
 
           GameObject clone = Instantiate(CarrierCrew);  //Should add crew to every carrier now
-          clone.name = "Crew";
+          clone.name = "CarrierCrew";
           clone.transform.parent = actor.gameObject.GetComponent<Transform>();
-          clone.transform.localPosition = new Vector3(-10, 23.98f, -10);
+          clone.transform.localPosition = new Vector3(0, 23.98f, 0);
           clone.transform.localEulerAngles = new Vector3(0, 0, 0);
           clone.SetActive(true);
           Log("Supercarrier: Added " + clone + " to " + actor);
@@ -97,7 +97,8 @@ namespace VTOLVRSupercarrier
 
     private void SceneChanged(VTOLScenes scenes) 
     {
-      //Carriers = null;
+      Log("Scene changed");
+      Carriers = null;
       if (scenes == VTOLScenes.Akutan || scenes == VTOLScenes.CustomMapBase || scenes == VTOLScenes.CustomMapBase_OverCloud) // If inside of a scene that you can fly in
       {
         Log("Flight Scene");
@@ -110,7 +111,8 @@ namespace VTOLVRSupercarrier
       //(might be fixed) Need logic here to check which carrier the player requested from and then assign to specific deck crew
       GameObject localCarrier = instance.gameObject;
       Log("setPlayerCat called on " + localCarrier);
-      Transform Shooter = localCarrier.GetComponent<Transform>().Find("Crew/Shooter/DeckCrewLights").transform;
+      Log(instance.GetComponentInChildren<ShooterHandler>());
+      Transform Shooter = localCarrier.transform.Find("CarrierCrew/Crew/Shooter/DeckCrewLights").transform;
       Log("Shooter transform " + Shooter);
       ShooterHandler shooterHandler = Shooter.GetComponent<ShooterHandler>();
       Log("Shooter script " + shooterHandler);
