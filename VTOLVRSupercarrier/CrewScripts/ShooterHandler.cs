@@ -109,7 +109,7 @@ public class ShooterHandler : MonoBehaviour
         }
         break;
       case (AlignmentState.Runup):
-        lookPos = playerTarget.transform.position - agent.transform.position;
+        lookPos = hookPoint.transform.position - agent.transform.position;
         lookPos.y = 0;
         rotation = Quaternion.LookRotation(lookPos);
         agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, rotation, Time.deltaTime * 2);

@@ -98,10 +98,10 @@ public class CarrierCatapultPatch
     hasCalled = false;
   }
 
-  private static IEnumerator CatWait(CarrierCatapult __instance, float start) 
+  private static IEnumerator CatWait(CarrierCatapult __instance, float start)
   {
     Traverse traverse = Traverse.Create(__instance);
-    while (Time.time - start <= 10)
+    while (Time.time - start <= 5)
     {
       traverse.Field("catPosition").SetValue(traverse.Field("launchStartPos").GetValue());
       traverse.Field("catRb").GetValue<Rigidbody>().MovePosition(__instance.WorldPos(traverse.Field("catPosition").GetValue<Vector3>()));
@@ -121,12 +121,16 @@ class AITakeOffPatch
 {
   public void Prefix(AIPilot __instance, AICarrierSpawn ___carrier, int ___spawnIdx)
   {
-    CarrierCatapult catapult = ___carrier.spawnPoints[___spawnIdx].catapult;
-    GameObject vehicle = __instance.gameObject;
-    Main.setPlayerCat(___carrier, catapult, vehicle);
+    if (___carrier.usesCatapults)
+    {
+      CarrierCatapult catapult = ___carrier.spawnPoints[___spawnIdx].catapult;
+      GameObject vehicle = __instance.gameObject;
+      Main.setPlayerCat(___carrier, catapult, vehicle);
+    }
   }
 }
 
+//https://gist.github.com/pardeike/c873b95e983e4814a8f6eb522329aee5 Make the ai plane stop just before the catapult to lower hook
 
 //********Postfix cat launch to remove alignment script
 /*[HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.Hook))]

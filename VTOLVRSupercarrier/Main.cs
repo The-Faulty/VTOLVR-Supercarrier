@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using Harmony;
 using System.Reflection;
+using UnityEngine.SceneManagement;
 
 namespace VTOLVRSupercarrier
 {
   public class Main : VTOLMOD
   {
     private bool patched = false;
+    private bool isLoaded = false;
 
-    private static List<Actor> Carriers = new List<Actor>();
+    List<Actor> Carriers = new List<Actor>();
 
     public static GameObject CarrierCrew;
 
@@ -28,6 +30,7 @@ namespace VTOLVRSupercarrier
       }
       VTOLAPI.SceneLoaded += SceneChanged;
       VTOLAPI.MissionReloaded += MissionReloaded;
+      SceneManager.sceneUnloaded += SceneUnload;
       base.ModLoaded();
     }
 
@@ -81,12 +84,13 @@ namespace VTOLVRSupercarrier
           clone.transform.parent = actor.gameObject.GetComponent<Transform>();
           clone.transform.localPosition = new Vector3(0, 23.98f, 0);
           clone.transform.localEulerAngles = new Vector3(0, 0, 0);
+          clone.transform.GetComponentInChildren<CrewManager>().carrier = actor.gameObject.GetComponent<AICarrierSpawn>();
           clone.SetActive(true);
           Log("Supercarrier: Added " + clone + " to " + actor);
         }
       });
       Log(Carriers[0].GetComponent<Transform>());
-      
+      isLoaded = true;
       yield break;
     }
 
@@ -104,6 +108,17 @@ namespace VTOLVRSupercarrier
       Log("Mission Reloaded");
       StartCoroutine(loadSupercarrier());
     }
+    private void SceneUnload(Scene s)
+    {
+      if (isLoaded)
+      {
+        foreach (Actor carrier in Carriers) //Remove each carrier crew when the scene unloads
+        {
+          Destroy(carrier.transform.Find("CarrierCrew"));
+        }
+      }
+    }
+    
 
     //rename to addTakeoffRequest
     public static void setPlayerCat(AICarrierSpawn instance, CarrierCatapult cat, GameObject vehicle = null)

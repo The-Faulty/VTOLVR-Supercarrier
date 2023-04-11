@@ -31,6 +31,8 @@ public class CrewManager
 
   public event Action<VehicleInQueue> StartAlignment;
 
+  public AICarrierSpawn carrier;
+
   public void takeoffRequest(CarrierCatapult cat, GameObject vehicle)
   {
     if (vehicle == null)
