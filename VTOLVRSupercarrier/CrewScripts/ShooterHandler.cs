@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,8 +8,9 @@ public class ShooterHandler : MonoBehaviour
 
   public Transform idlePoint;
   public Transform alignPoint;
-  public Transform playerTarget;
-  public Transform gameTarget;
+  public Transform hookPoint;
+  public Transform planeCOM;
+  public Transform hookTarget;
   public Transform agent;
 
   public CrewManager Manager;
@@ -68,7 +69,7 @@ public class ShooterHandler : MonoBehaviour
       case (AlignmentState.Taxi):
         if (navAgent.remainingDistance < .3)
         {
-          lookPos = playerTarget.transform.position - agent.transform.position;
+          lookPos = hookPoint.transform.position - agent.transform.position;
           lookPos.y = 0;
           rotation = Quaternion.LookRotation(lookPos);
           agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, rotation, Time.deltaTime * 2);
@@ -132,7 +133,7 @@ public class ShooterHandler : MonoBehaviour
   //******make close and far for launch bar deployment
   void Align()
   {
-    float relativeAngle = Vector2.SignedAngle(new Vector2(gameTarget.forward.x, gameTarget.forward.z), new Vector2((gameTarget.position - playerTarget.position).x, (gameTarget.position - playerTarget.position).z));
+    float relativeAngle = Vector2.SignedAngle(new Vector2(hookTarget.forward.x, hookTarget.forward.z), new Vector2((hookTarget.position - planeCOM.position).x, (hookTarget.position - planeCOM.position).z));
     if (relativeAngle > 5)
     {
       left();
@@ -145,7 +146,7 @@ public class ShooterHandler : MonoBehaviour
     {
       forward();
     }
-    if ((gameTarget.transform.position - playerTarget.transform.position).sqrMagnitude < 1.5 && Vector3.Dot(playerTarget.transform.forward, gameTarget.forward) > 0.5f)
+    if ((hookTarget.transform.position - hookPoint.transform.position).sqrMagnitude < 1.5 && Vector3.Dot(hookPoint.transform.forward, hookTarget.forward) > 0.5f)
     {
       indicator.text = "Bar";
       //Log("Bar");
@@ -215,11 +216,12 @@ public class ShooterHandler : MonoBehaviour
       catHook = Vehicle.GetComponentInChildren<CatapultHook>();
       catHook.OnHooked.AddListener(onHook);
 
-      playerTarget = catHook.hookForcePointTransform;
-      gameTarget = playerCat.catapultTransform;
+    hookPoint = catHook.hookForcePointTransform;
+    hookTarget = playerCat.catapultTransform;
+    planeCOM = Vehicle.GetComponentInChildren<GearAnimator>().dragComponent.transform;
 
-      Log(playerTarget);
-      Log(gameTarget);
+    Log(hookPoint);
+    Log(hookTarget);
 
       AlignTrigger();
     }

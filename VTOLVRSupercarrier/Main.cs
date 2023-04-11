@@ -27,6 +27,7 @@ namespace VTOLVRSupercarrier
         StartCoroutine(loadIndicatorAsync());
       }
       VTOLAPI.SceneLoaded += SceneChanged;
+      VTOLAPI.MissionReloaded += MissionReloaded;
       base.ModLoaded();
     }
 
@@ -61,9 +62,10 @@ namespace VTOLVRSupercarrier
       yield break;
     }
 
-    public IEnumerator getCarriers()
+    public IEnumerator loadSupercarrier()
     {
       Log("getCarriers");
+      Carriers.Clear();
       TargetManager tm = TargetManager.instance;
       while (tm.alliedUnits.Count < 5) yield return new WaitForSeconds(1f);
       tm.alliedUnits.ForEach(actor =>
@@ -91,12 +93,16 @@ namespace VTOLVRSupercarrier
     private void SceneChanged(VTOLScenes scenes) 
     {
       Log("Scene changed");
-      Carriers = null;
       if (scenes == VTOLScenes.Akutan || scenes == VTOLScenes.CustomMapBase || scenes == VTOLScenes.CustomMapBase_OverCloud) // If inside of a scene that you can fly in
       {
         Log("Flight Scene");
-        StartCoroutine(getCarriers());
+        StartCoroutine(loadSupercarrier());
       }
+    }
+    private void MissionReloaded()
+    {
+      Log("Mission Reloaded");
+      StartCoroutine(loadSupercarrier());
     }
 
     //rename to addTakeoffRequest

@@ -54,7 +54,7 @@ public class CrewNav : MonoBehaviour
       rotation = Quaternion.LookRotation(lookPos);
       CharacterTransform.localRotation = Quaternion.Slerp(CharacterTransform.localRotation, rotation, Time.deltaTime * 2);
       CharacterTransform.localPosition = Vector3.Lerp(startPos, pos, 1 - (remainingDistance / distance));
-      if (remainingDistance > 5)
+      if (remainingDistance > 2)
       {
         remainingDistance -= JogSpeed * Time.deltaTime;
       } else
@@ -64,7 +64,7 @@ public class CrewNav : MonoBehaviour
       yield return new WaitForFixedUpdate();
     }
     anim.SetBool("walk", false);
-    anim.SetBool("idle", true);
+    anim.SetBool("idle", true);;
   }
 
   private void Log(object text)

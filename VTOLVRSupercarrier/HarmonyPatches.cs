@@ -1,4 +1,4 @@
-﻿using Harmony;
+using Harmony;
 using UnityEngine;
 using VTOLVRSupercarrier;
 using System.Collections;
