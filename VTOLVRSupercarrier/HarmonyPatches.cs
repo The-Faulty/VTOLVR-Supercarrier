@@ -1,11 +1,7 @@
-﻿using System;
-using UnityEditor;
-using Harmony;
+﻿using Harmony;
 using UnityEngine;
 using VTOLVRSupercarrier;
-using System.Reflection;
 using System.Collections;
-using System.Threading.Tasks;
 
 /*[HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.Hook))]
 public class ExtendCatapultLaunch
@@ -116,6 +112,18 @@ public class CarrierCatapultPatch
   private static void Log(object text)
   {
     Debug.Log("CarrierCatapultPatch: " + text);
+  }
+}
+
+//Register AI Takeoff Request
+[HarmonyPatch(typeof(AIPilot), nameof(AIPilot.TakeOffCarrier))]
+class AITakeOffPatch
+{
+  public void Prefix(AIPilot __instance, AICarrierSpawn ___carrier, int ___spawnIdx)
+  {
+    CarrierCatapult catapult = ___carrier.spawnPoints[___spawnIdx].catapult;
+    GameObject vehicle = __instance.gameObject;
+    Main.setPlayerCat(___carrier, catapult, vehicle);
   }
 }
 

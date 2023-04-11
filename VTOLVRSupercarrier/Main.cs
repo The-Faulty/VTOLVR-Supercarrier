@@ -1,15 +1,8 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
 using Harmony;
 using System.Reflection;
-using System.IO;
-using UnityEngine.SceneManagement;
 
 namespace VTOLVRSupercarrier
 {
@@ -106,18 +99,16 @@ namespace VTOLVRSupercarrier
       }
     }
 
-    public static void setPlayerCat(AICarrierSpawn instance, CarrierCatapult cat)
+    //rename to addTakeoffRequest
+    public static void setPlayerCat(AICarrierSpawn instance, CarrierCatapult cat, GameObject vehicle = null)
     {
       //(might be fixed) Need logic here to check which carrier the player requested from and then assign to specific deck crew
       GameObject localCarrier = instance.gameObject;
-      Log("setPlayerCat called on " + localCarrier);
-      Log(instance.GetComponentInChildren<ShooterHandler>());
-      Transform Shooter = localCarrier.transform.Find("CarrierCrew/Crew/Shooter/DeckCrewLights").transform;
-      Log("Shooter transform " + Shooter);
-      ShooterHandler shooterHandler = Shooter.GetComponent<ShooterHandler>();
-      Log("Shooter script " + shooterHandler);
+      Log("Player takeoff request on " + localCarrier);
 
-      shooterHandler.startAlign(cat, VTOLAPI.GetPlayersVehicleGameObject());
+      CrewManager manager = localCarrier.GetComponentInChildren<CrewManager>();
+
+      manager.takeoffRequest(cat, vehicle);
       Log("setPlayerCat Over");
     }
 

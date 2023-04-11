@@ -75,9 +75,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CrewScripts\CrewManager.cs" />
     <Compile Include="CrewScripts\CrewNav.cs" />
     <Compile Include="CrewScripts\ShooterHandler.cs" />
-    <Compile Include="UIHandler.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

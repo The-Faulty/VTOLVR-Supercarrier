@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.UI;
 
 public class ShooterHandler : MonoBehaviour
@@ -14,12 +12,15 @@ public class ShooterHandler : MonoBehaviour
   public Transform gameTarget;
   public Transform agent;
 
+  public CrewManager Manager;
+
   public CrewNav navAgent;
 
   [Header("Nav Points")]
   public List<GameObject> Catapults = new List<GameObject>();
 
   public Text indicator;
+  public int designation = 4;
 
   private VehicleMaster Vehicle;
   private ModuleEngine[] Engines;
@@ -27,12 +28,8 @@ public class ShooterHandler : MonoBehaviour
   private CarrierCatapult playerCat;
 
   private bool isIdle = true;
-  private bool bar = false;
-  private bool wings = false;
-  private bool engines = false;
-  private bool isWalking = false;
 
-  private enum PlayerState
+  private enum AlignmentState
   {
     None,
     Taxi,
@@ -44,7 +41,7 @@ public class ShooterHandler : MonoBehaviour
     Launch
   }
 
-  PlayerState state;
+  AlignmentState state;
 
   private void OnEnable()
   {
@@ -56,7 +53,8 @@ public class ShooterHandler : MonoBehaviour
       Log(cat.gameObject);
       Catapults.Add(cat.gameObject);
     }
-    state = PlayerState.None;
+    state = AlignmentState.None;
+    Manager.StartAlignment += startAlign;
   }
 
   [ContextMenu("Update")]
@@ -67,7 +65,7 @@ public class ShooterHandler : MonoBehaviour
     Quaternion rotation;
     switch (state)
     {
-      case (PlayerState.Taxi):
+      case (AlignmentState.Taxi):
         if (navAgent.remainingDistance < .3)
         {
           lookPos = playerTarget.transform.position - agent.transform.position;
@@ -78,38 +76,38 @@ public class ShooterHandler : MonoBehaviour
           Align();
         }
         break;
-      case (PlayerState.LaunchBar):
+      case (AlignmentState.LaunchBar):
         if (catHook.deployed)
         {
           Log("Hook");
-          state = PlayerState.Hook;
+          state = AlignmentState.Hook;
           anim.SetBool("bar", false);
 
           indicator.text = "Forward";
           anim.SetBool("forward", true);
         }
         break;
-      case (PlayerState.Hook):
+      case (AlignmentState.Hook):
         //align closer
         break;
-      case (PlayerState.Wings):
+      case (AlignmentState.Wings):
         if (!Vehicle.wingFolder.deployed)
         {
           indicator.text = "";
           anim.SetBool("wings", false);
           navAgent.SetDestination(idlePoint.localPosition);
-          state = PlayerState.LaunchReady;
+          state = AlignmentState.LaunchReady;
         }
         break;
-      case (PlayerState.LaunchReady):
+      case (AlignmentState.LaunchReady):
         if (navAgent.remainingDistance < .3)
         {
           indicator.text = "Engines";
           anim.SetBool("runup", true);
-          state = PlayerState.Runup;
+          state = AlignmentState.Runup;
         }
         break;
-      case (PlayerState.Runup):
+      case (AlignmentState.Runup):
         lookPos = playerTarget.transform.position - agent.transform.position;
         lookPos.y = 0;
         rotation = Quaternion.LookRotation(lookPos);
@@ -122,7 +120,7 @@ public class ShooterHandler : MonoBehaviour
         }
         if (flag)
         {
-          state = PlayerState.Launch;
+          state = AlignmentState.Launch;
           anim.SetBool("runup", false);
           anim.SetBool("launch", true);
           indicator.text = "Launch";
@@ -155,7 +153,7 @@ public class ShooterHandler : MonoBehaviour
       anim.SetBool("right", false);
       anim.SetBool("forward", false);
       anim.SetBool("bar", true);
-      state = PlayerState.LaunchBar;
+      state = AlignmentState.LaunchBar;
     }
   }
 
@@ -191,7 +189,7 @@ public class ShooterHandler : MonoBehaviour
     Log("Align trigger");
     //AlignButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = "Stop Align";
     navAgent.SetDestination(alignPoint.localPosition);
-    state = PlayerState.Taxi;
+    state = AlignmentState.Taxi;
     isIdle = !isIdle;
     anim.SetBool("left", false);
     anim.SetBool("right", false);
@@ -201,33 +199,36 @@ public class ShooterHandler : MonoBehaviour
     anim.SetBool("launch", false);
   }
 
-  public void startAlign(CarrierCatapult cat, GameObject vehicle)
+  public void startAlign(CrewManager.VehicleInQueue v)
   {
-    Log("Start Align");
-    GameObject catNavPoints = Catapults[0]; //Catapults[cat.catapultDesignation - 1]; .getComponentsInChildren?
+    if (v.catNumber == designation)
+    {
+      Log("Start Align");
+      GameObject catNavPoints = Catapults[0]; //Catapults[cat.catapultDesignation - 1]; .getComponentsInChildren?
 
-    alignPoint = catNavPoints.transform.Find("AlignPoint").transform;
-    idlePoint = catNavPoints.transform.Find("IdlePoint").transform;
+      alignPoint = catNavPoints.transform.Find("AlignPoint").transform;
+      idlePoint = catNavPoints.transform.Find("IdlePoint").transform;
 
-    playerCat = cat;
-    Vehicle = vehicle.GetComponent<VehicleMaster>();
-    Engines = Vehicle.engines;
-    catHook = Vehicle.GetComponentInChildren<CatapultHook>();
-    catHook.OnHooked.AddListener(onHook);
+      playerCat = v.catapult;
+      Vehicle = v.vehicle.GetComponent<VehicleMaster>();
+      Engines = Vehicle.engines;
+      catHook = Vehicle.GetComponentInChildren<CatapultHook>();
+      catHook.OnHooked.AddListener(onHook);
 
-    playerTarget = catHook.hookForcePointTransform;
-    gameTarget = playerCat.catapultTransform;
+      playerTarget = catHook.hookForcePointTransform;
+      gameTarget = playerCat.catapultTransform;
 
-    Log(playerTarget);
-    Log(gameTarget);
+      Log(playerTarget);
+      Log(gameTarget);
 
-    AlignTrigger();
+      AlignTrigger();
+    }
   }
 
   void onHook()
   {
     indicator.text = "Wings";
-    state = PlayerState.Wings;
+    state = AlignmentState.Wings;
   }
 
   private void Log(object text)
