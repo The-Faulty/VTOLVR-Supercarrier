@@ -10,7 +10,9 @@ public class CrewNav : MonoBehaviour
   public float remainingDistance;
   public float JogSpeed = 3f;
   public float WalkSpeed = 1.5f;
+  public float BackupSpeed = 1f;
 
+  private bool isMoving = false;
 
   public CrewNav(Transform charT)
   {
@@ -23,6 +25,7 @@ public class CrewNav : MonoBehaviour
     Log("Jog Speed - " + JogSpeed);
     WalkSpeed = 1.5f;
     JogSpeed = 3f;
+    BackupSpeed = 1f;
     anim = GetComponent<Animator>();
     Debug.Log(anim);
   }
@@ -41,7 +44,6 @@ public class CrewNav : MonoBehaviour
     Vector3 lookPos;
     Quaternion rotation;
     Vector3 startPos = CharacterTransform.localPosition;
-    Log(startPos);
     float distance = Vector3.Distance(startPos, pos);
     remainingDistance = distance;
 
@@ -64,7 +66,49 @@ public class CrewNav : MonoBehaviour
       yield return new WaitForFixedUpdate();
     }
     anim.SetBool("walk", false);
-    anim.SetBool("idle", true);;
+    anim.SetBool("idle", true);
+  }
+
+  public void SetMovingDesitination(GameObject target, bool backwards = false)
+  {
+    StartCoroutine(MoveToMovingAsync(target, backwards));
+  }
+
+  private IEnumerator MoveToMovingAsync(GameObject target, bool backwards)
+  {
+    Vector3 pos = target.transform.position;
+    Log(CharacterTransform.gameObject);
+    Log("Move to" + pos);
+
+    Vector3 lookPos;
+    Quaternion rotation;
+    Vector3 startPos = CharacterTransform.localPosition;
+    float distance = Vector3.Distance(startPos, pos);
+    remainingDistance = distance;
+    
+    anim.SetBool("idle", false);
+    if (backwards)
+    {
+      anim.SetBool("backup", true);
+    } else
+    {
+      anim.SetBool("walk", true);
+    }
+
+    while (remainingDistance > 0)
+    {
+      pos = target.transform.position;
+      lookPos = CharacterTransform.localPosition - pos;
+      lookPos.y = 0;
+      rotation = Quaternion.LookRotation(lookPos);
+      CharacterTransform.localRotation = Quaternion.Slerp(CharacterTransform.localRotation, rotation, Time.deltaTime * 2);
+      CharacterTransform.localPosition = Vector3.Lerp(startPos, pos, 1 - (remainingDistance / distance));
+      remainingDistance -= BackupSpeed * Time.deltaTime;
+      yield return new WaitForFixedUpdate();
+    }
+    anim.SetBool("walk", false);
+    anim.SetBool("backup", false);
+    anim.SetBool("idle", true);
   }
 
   private void Log(object text)

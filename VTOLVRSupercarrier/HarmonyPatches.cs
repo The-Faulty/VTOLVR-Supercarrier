@@ -2,6 +2,7 @@ using Harmony;
 using UnityEngine;
 using VTOLVRSupercarrier;
 using System.Collections;
+using System;
 
 /*[HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.Hook))]
 public class ExtendCatapultLaunch
@@ -131,6 +132,54 @@ class AITakeOffPatch
 }
 
 //https://gist.github.com/pardeike/c873b95e983e4814a8f6eb522329aee5 Make the ai plane stop just before the catapult to lower hook
+[HarmonyPatch(typeof(AIPilot), nameof(AIPilot.CTO_TaxiToCatapult))]
+class AIPilotCarrierTaxiPatch
+{
+  class SimpleEnumerator : IEnumerable
+  {
+    public IEnumerator enumerator;
+    public Action prefixAction, postfixAction;
+    public Action<object> preItemAction, postItemAction;
+    public Func<object, object> itemAction;
+    IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+    public IEnumerator GetEnumerator()
+    {
+      prefixAction();
+      while (enumerator.MoveNext())
+      {
+        var item = enumerator.Current;
+        preItemAction(item);
+        yield return itemAction(item);
+        postItemAction(item);
+      }
+      postfixAction();
+    }
+  }
+
+  static void Postfix(ref IEnumerator __result)
+  {
+    Action prefixAction = () => { Console.WriteLine("--> beginning"); };
+    Action postfixAction = () => { Console.WriteLine("--> ending"); };
+    Action<object> preItemAction = (item) => { Console.WriteLine($"--> before {item}"); };
+    Action<object> postItemAction = (item) => { Console.WriteLine($"--> after {item}"); };
+    Func<object, object> itemAction = (item) =>
+    {
+      var newItem = item + "+";
+      Console.WriteLine($"--> item {item} => {newItem}");
+      return newItem;
+    };
+    var myEnumerator = new SimpleEnumerator()
+    {
+      enumerator = __result,
+      prefixAction = prefixAction,
+      postfixAction = postfixAction,
+      preItemAction = preItemAction,
+      postItemAction = postItemAction,
+      itemAction = itemAction
+    };
+    __result = myEnumerator.GetEnumerator();
+  }
+}
 
 //********Postfix cat launch to remove alignment script
 /*[HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.Hook))]
