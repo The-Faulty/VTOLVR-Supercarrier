@@ -22,10 +22,10 @@ namespace VTOLVRSupercarrier
       //This is an event the VTOLAPI calls when the game is done loading a scene
       if (!patched)
       {
-        HarmonyInstance harmony = HarmonyInstance.Create("the_faulty.align");
+        HarmonyInstance harmony = HarmonyInstance.Create("the_faulty.supercarrier");
         harmony.PatchAll(Assembly.GetExecutingAssembly());
         patched = true;
-        Log("Align has been patched");
+        Log("Supercarrier has been patched");
         StartCoroutine(loadIndicatorAsync());
       }
       VTOLAPI.SceneLoaded += SceneChanged;
@@ -50,8 +50,11 @@ namespace VTOLVRSupercarrier
       Transform Shooter = CarrierCrew.transform.Find("Crew/Shooter").transform;
       GameObject ShooterMain = Shooter.transform.Find("DeckCrewLights").gameObject;
 
+      CrewManager crewManager = CarrierCrew.AddComponent<CrewManager>();
+
       ShooterHandler shooterHandler = ShooterMain.AddComponent<ShooterHandler>();
       shooterHandler.agent = Shooter;
+      shooterHandler.Manager = crewManager;
 
       CrewNav nav = ShooterMain.AddComponent<CrewNav>();
       nav.CharacterTransform = Shooter;

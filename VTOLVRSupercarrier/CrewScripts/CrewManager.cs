@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class CrewManager
+public class CrewManager : MonoBehaviour
 {
   public enum TaxiState
   {

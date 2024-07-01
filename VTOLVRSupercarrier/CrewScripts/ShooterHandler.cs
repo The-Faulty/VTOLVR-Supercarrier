@@ -55,7 +55,9 @@ public class ShooterHandler : MonoBehaviour
       Catapults.Add(cat.gameObject);
     }
     state = AlignmentState.None;
+    Log("ShooterHandler Enable almost done");
     Manager.StartAlignment += startAlign;
+    Log("ShooterHandler Enable Finish");
   }
 
   [ContextMenu("Update")]
@@ -205,7 +207,7 @@ public class ShooterHandler : MonoBehaviour
     if (v.catNumber == designation)
     {
       Log("Start Align");
-      GameObject catNavPoints = Catapults[0]; //Catapults[cat.catapultDesignation - 1]; .getComponentsInChildren?
+      GameObject catNavPoints = Catapults[v.catapult.catapultDesignation - 1]; //.getComponentsInChildren?
 
       alignPoint = catNavPoints.transform.Find("AlignPoint").transform;
       idlePoint = catNavPoints.transform.Find("IdlePoint").transform;

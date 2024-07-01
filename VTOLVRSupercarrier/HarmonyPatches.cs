@@ -102,7 +102,7 @@ public class CarrierCatapultPatch
   private static IEnumerator CatWait(CarrierCatapult __instance, float start)
   {
     Traverse traverse = Traverse.Create(__instance);
-    while (Time.time - start <= 5)
+    while (Time.time - start <= 3)
     {
       traverse.Field("catPosition").SetValue(traverse.Field("launchStartPos").GetValue());
       traverse.Field("catRb").GetValue<Rigidbody>().MovePosition(__instance.WorldPos(traverse.Field("catPosition").GetValue<Vector3>()));
@@ -117,10 +117,10 @@ public class CarrierCatapultPatch
 }
 
 //Register AI Takeoff Request
-[HarmonyPatch(typeof(AIPilot), nameof(AIPilot.TakeOffCarrier))]
+/*[HarmonyPatch(typeof(AIPilot), nameof(AIPilot.TakeOffCarrier))]
 class AITakeOffPatch
 {
-  public void Prefix(AIPilot __instance, AICarrierSpawn ___carrier, int ___spawnIdx)
+  public static void Prefix(AIPilot __instance, ref AICarrierSpawn ___carrier, ref int ___spawnIdx)
   {
     if (___carrier.usesCatapults)
     {
@@ -132,7 +132,7 @@ class AITakeOffPatch
 }
 
 //https://gist.github.com/pardeike/c873b95e983e4814a8f6eb522329aee5 Make the ai plane stop just before the catapult to lower hook
-[HarmonyPatch(typeof(AIPilot), nameof(AIPilot.CTO_TaxiToCatapult))]
+/*[HarmonyPatch(typeof(AIPilot), nameof(AIPilot.CTO_TaxiToCatapult))]
 class AIPilotCarrierTaxiPatch
 {
   class SimpleEnumerator : IEnumerable
@@ -179,7 +179,7 @@ class AIPilotCarrierTaxiPatch
     };
     __result = myEnumerator.GetEnumerator();
   }
-}
+}*/
 
 //********Postfix cat launch to remove alignment script
 /*[HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.Hook))]
