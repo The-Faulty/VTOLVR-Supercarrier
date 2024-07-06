@@ -28,6 +28,7 @@ namespace VTOLVRSupercarrier
         Log("Supercarrier has been patched");
         StartCoroutine(loadIndicatorAsync());
       }
+
       VTOLAPI.SceneLoaded += SceneChanged;
       VTOLAPI.MissionReloaded += MissionReloaded;
       SceneManager.sceneUnloaded += SceneUnload;
@@ -80,7 +81,7 @@ namespace VTOLVRSupercarrier
         if (actor.iconType == UnitIconManager.MapIconTypes.Carrier)
         {
           Log("Carrier found: " + actor);
-          //Carriers.Add(actor);
+          Carriers.Add(actor);
 
           GameObject clone = Instantiate(CarrierCrew);  //Should add crew to every carrier now
           clone.name = "CarrierCrew";
@@ -89,7 +90,7 @@ namespace VTOLVRSupercarrier
           clone.transform.localEulerAngles = new Vector3(0, 0, 0);
           clone.transform.GetComponentInChildren<CrewManager>().carrier = actor.gameObject.GetComponent<AICarrierSpawn>();
           clone.SetActive(true);
-          Log("Supercarrier: Added " + clone + " to " + actor);
+          Log("Added " + clone + " to " + actor);
         }
       });
       Log(Carriers[0].GetComponent<Transform>());

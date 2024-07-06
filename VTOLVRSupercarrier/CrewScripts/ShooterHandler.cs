@@ -19,8 +19,6 @@ public class ShooterHandler : MonoBehaviour
 
   [Header("Nav Points")]
   public List<GameObject> Catapults = new List<GameObject>();
-
-  public Text indicator;
   public int designation = 4;
 
   private VehicleMaster Vehicle;
@@ -48,14 +46,13 @@ public class ShooterHandler : MonoBehaviour
   {
     anim = GetComponent<Animator>();
     Log("HandlerAnim: " + anim);
-    indicator = transform.Find("DeckCrewMesh/Canvas/Text").GetComponent<Text>();
     foreach (Transform cat in transform.parent.parent.parent.Find("NavPoints"))
     {
       Log(cat.gameObject);
       Catapults.Add(cat.gameObject);
     }
     state = AlignmentState.None;
-    Log("ShooterHandler Enable almost done");
+    navAgent.SetDestination(Catapults[0].transform.GetChild(1).localPosition);
     Manager.StartAlignment += startAlign;
     Log("ShooterHandler Enable Finish");
   }
@@ -77,6 +74,16 @@ public class ShooterHandler : MonoBehaviour
           agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, rotation, Time.deltaTime * 2);
           //do alignment stuff
           Align();
+
+          if ((hookTarget.transform.position - hookPoint.transform.position).sqrMagnitude < 1.5 && Vector3.Dot(hookPoint.transform.forward, hookTarget.forward) > 0.5f)
+          {
+            //Log("Bar");
+            anim.SetBool("left", false);
+            anim.SetBool("right", false);
+            anim.SetBool("forward", false);
+            anim.SetBool("bar", true);
+            state = AlignmentState.LaunchBar;
+          }
         }
         break;
       case (AlignmentState.LaunchBar):
@@ -86,17 +93,23 @@ public class ShooterHandler : MonoBehaviour
           state = AlignmentState.Hook;
           anim.SetBool("bar", false);
 
-          indicator.text = "Forward";
           anim.SetBool("forward", true);
         }
         break;
       case (AlignmentState.Hook):
-        //align closer
+        Align();
+        if ((hookTarget.transform.position - hookPoint.transform.position).sqrMagnitude < 0.36f && Vector3.Dot(hookPoint.transform.forward, hookTarget.forward) > 0.5f)
+        {
+          anim.SetBool("left", false);
+          anim.SetBool("right", false);
+          anim.SetBool("forward", false);
+          anim.SetBool("wings", true);
+          state = AlignmentState.Wings;
+        }
         break;
       case (AlignmentState.Wings):
         if (!Vehicle.wingFolder.deployed)
         {
-          indicator.text = "";
           anim.SetBool("wings", false);
           navAgent.SetDestination(idlePoint.localPosition);
           state = AlignmentState.LaunchReady;
@@ -105,7 +118,6 @@ public class ShooterHandler : MonoBehaviour
       case (AlignmentState.LaunchReady):
         if (navAgent.remainingDistance < .3)
         {
-          indicator.text = "Engines";
           anim.SetBool("runup", true);
           state = AlignmentState.Runup;
         }
@@ -126,7 +138,6 @@ public class ShooterHandler : MonoBehaviour
           state = AlignmentState.Launch;
           anim.SetBool("runup", false);
           anim.SetBool("launch", true);
-          indicator.text = "Launch";
         }
         break;
     }
@@ -148,21 +159,10 @@ public class ShooterHandler : MonoBehaviour
     {
       forward();
     }
-    if ((hookTarget.transform.position - hookPoint.transform.position).sqrMagnitude < 1.5 && Vector3.Dot(hookPoint.transform.forward, hookTarget.forward) > 0.5f)
-    {
-      indicator.text = "Bar";
-      //Log("Bar");
-      anim.SetBool("left", false);
-      anim.SetBool("right", false);
-      anim.SetBool("forward", false);
-      anim.SetBool("bar", true);
-      state = AlignmentState.LaunchBar;
-    }
   }
 
   void forward()
   {
-    indicator.text = "Forward";
     anim.SetBool("left", false);
     anim.SetBool("right", false);
     anim.SetBool("forward", true);
@@ -170,7 +170,6 @@ public class ShooterHandler : MonoBehaviour
 
   void right()
   {
-    indicator.text = "Right";
     //Log("right");
     anim.SetBool("left", false);
     anim.SetBool("right", true);
@@ -179,7 +178,6 @@ public class ShooterHandler : MonoBehaviour
 
   void left()
   {
-    indicator.text = "Left";
     //Log("left");
     anim.SetBool("left", true);
     anim.SetBool("right", false);
@@ -218,12 +216,12 @@ public class ShooterHandler : MonoBehaviour
       catHook = Vehicle.GetComponentInChildren<CatapultHook>();
       catHook.OnHooked.AddListener(onHook);
 
-    hookPoint = catHook.hookForcePointTransform;
-    hookTarget = playerCat.catapultTransform;
-    planeCOM = Vehicle.GetComponentInChildren<GearAnimator>().dragComponent.transform;
+      hookPoint = catHook.hookForcePointTransform;
+      hookTarget = playerCat.catapultTransform;
+      planeCOM = Vehicle.GetComponentInChildren<GearAnimator>().dragComponent.transform;
 
-    Log(hookPoint);
-    Log(hookTarget);
+      Log(hookPoint);
+      Log(hookTarget);
 
       AlignTrigger();
     }
@@ -231,7 +229,6 @@ public class ShooterHandler : MonoBehaviour
 
   void onHook()
   {
-    indicator.text = "Wings";
     state = AlignmentState.Wings;
   }
 

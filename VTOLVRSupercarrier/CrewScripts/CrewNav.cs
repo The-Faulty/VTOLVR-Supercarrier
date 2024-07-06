@@ -8,7 +8,7 @@ public class CrewNav : MonoBehaviour
   public Animator anim;
 
   public float remainingDistance;
-  public float JogSpeed = 3f;
+  public float JogSpeed = 2.5f;
   public float WalkSpeed = 1.5f;
   public float BackupSpeed = 1f;
 
@@ -47,7 +47,7 @@ public class CrewNav : MonoBehaviour
     float distance = Vector3.Distance(startPos, pos);
     remainingDistance = distance;
 
-    anim.SetBool("walk", true);
+    anim.SetBool("jog", true);
     anim.SetBool("idle", false);
     while (remainingDistance > 0)
     {
@@ -61,6 +61,8 @@ public class CrewNav : MonoBehaviour
         remainingDistance -= JogSpeed * Time.deltaTime;
       } else
       {
+        anim.SetBool("jog", false);
+        anim.SetBool("walk", true);
         remainingDistance -= WalkSpeed * Time.deltaTime;
       }
       yield return new WaitForFixedUpdate();
