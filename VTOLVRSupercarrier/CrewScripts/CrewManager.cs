@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using VTOLAPI;
 
 
 public class CrewManager : MonoBehaviour
@@ -37,7 +38,7 @@ public class CrewManager : MonoBehaviour
   {
     if (vehicle == null)
     {
-      vehicle = VTOLAPI.GetPlayersVehicleGameObject();
+      vehicle = VTAPI.GetPlayersVehicleGameObject();
     }
     VehicleInQueue data = new VehicleInQueue(vehicle, cat);
     vehicleQueue.Add(data);

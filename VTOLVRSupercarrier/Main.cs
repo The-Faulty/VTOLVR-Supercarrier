@@ -1,38 +1,35 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Harmony;
+using HarmonyLib;
+using ModLoader.Framework;
+using ModLoader.Framework.Attributes;
 using System.Reflection;
 using UnityEngine.SceneManagement;
+using VTOLAPI;
+using Mod_Loader.Classes;
+using System.IO;
 
 namespace VTOLVRSupercarrier
 {
-  public class Main : VTOLMOD
+  [ItemId("the_faulty-supercarrier")]
+  public class Main : VtolMod
   {
     private bool patched = false;
     private bool isLoaded = false;
+    private string ModFolder;
 
     List<Actor> Carriers = new List<Actor>();
 
     public static GameObject CarrierCrew;
 
-    // This method is run once, when the Mod Loader is done initialising this game object
-    public override void ModLoaded()
+    public void Awake()
     {
-      //This is an event the VTOLAPI calls when the game is done loading a scene
-      if (!patched)
-      {
-        HarmonyInstance harmony = HarmonyInstance.Create("the_faulty.supercarrier");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
-        patched = true;
-        Log("Supercarrier has been patched");
-        StartCoroutine(loadIndicatorAsync());
-      }
-
-      VTOLAPI.SceneLoaded += SceneChanged;
-      VTOLAPI.MissionReloaded += MissionReloaded;
+      ModFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+      StartCoroutine(loadIndicatorAsync());
+      VTAPI.SceneLoaded += SceneChanged;
+      VTAPI.MissionReloaded += MissionReloaded;
       SceneManager.sceneUnloaded += SceneUnload;
-      base.ModLoaded();
     }
 
     private IEnumerator loadIndicatorAsync() //thank you NotBDArmory github
@@ -143,10 +140,15 @@ namespace VTOLVRSupercarrier
       //AlignIndicator.SetActive(false);
     }*/
 
+    public override void UnLoad()
+    {
+      // Unload
+    }
     //Override the VTOLMOD.Log function because it doesn't work with static methods
-    private static new void Log(object text)
+    private static void Log(object text)
     {
       Debug.Log("VTOLVR-Supercarrier: " + text);
     }
+
   }
 }

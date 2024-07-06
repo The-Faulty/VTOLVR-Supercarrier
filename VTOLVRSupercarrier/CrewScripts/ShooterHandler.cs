@@ -52,7 +52,7 @@ public class ShooterHandler : MonoBehaviour
       Catapults.Add(cat.gameObject);
     }
     state = AlignmentState.None;
-    navAgent.SetDestination(Catapults[0].transform.GetChild(1).localPosition);
+    //navAgent.SetDestination(Catapults[0].transform.GetChild(1).localPosition);
     Manager.StartAlignment += startAlign;
     Log("ShooterHandler Enable Finish");
   }
