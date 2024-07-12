@@ -44,14 +44,14 @@ public class AICarrierSpawnPatch
 [HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.Hook))]
 public class CarrierCatapultPatch
 {
-  private static bool hasCalled = false;
   private static bool Prefix(CarrierCatapult __instance, CatapultHook hook, ref CatapultHook ___hook, ref Transform ___planeHookTransform, ref Rigidbody ___planeRb, ref FlightInfo ___flightInfo)
   {
-    if (!hasCalled)
+    Log("Attempting to hook");
+    Log("Traverse created");
+    Log(__instance.hooked);
+    if (!__instance.hooked)
     {
-      hasCalled = true;
-      Traverse traverse = Traverse.Create(__instance);
-      traverse.Field("hooked").SetValue(true);
+      __instance.hooked = true;
       ___hook = hook;
       ___planeHookTransform = hook.hookForcePointTransform;
       ___planeRb = hook.rb;
@@ -96,7 +96,6 @@ public class CarrierCatapultPatch
     Log("CarrierCatapultNew: begin ReturnRoutine");
     yield return __instance.ReturnRoutine();
     traverse.Field("catapultReady").SetValue(true);
-    hasCalled = false;
   }
 
   private static IEnumerator CatWait(CarrierCatapult __instance, float start)

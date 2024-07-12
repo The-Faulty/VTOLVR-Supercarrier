@@ -40,50 +40,48 @@ public class CrewNav : MonoBehaviour
     Log(CharacterTransform.gameObject);
     Log(CharacterTransform);
     Log("Move to" + pos);
-    
+
     Vector3 lookPos;
     Quaternion rotation;
     Vector3 startPos = CharacterTransform.localPosition;
     float distance = Vector3.Distance(startPos, pos);
     remainingDistance = distance;
 
-    while (remainingDistance > 0)
+
+    while (remainingDistance > 0.00001f)
     {
       lookPos = pos - CharacterTransform.localPosition;
       lookPos.y = 0;
       rotation = Quaternion.LookRotation(lookPos);
       CharacterTransform.localRotation = Quaternion.Slerp(CharacterTransform.localRotation, rotation, Time.deltaTime * 2);
       CharacterTransform.localPosition = Vector3.Lerp(startPos, pos, 1 - (remainingDistance / distance));
-      while (remainingDistance > 0f)
+      remainingDistance -= anim.GetFloat("walkBlend") * Time.deltaTime;
+      if (remainingDistance > 2)
       {
-        lookPos = pos - CharacterTransform.localPosition;
-        lookPos.y = 0;
-        rotation = Quaternion.LookRotation(lookPos);
-        CharacterTransform.localRotation = rotation; //Quaternion.Slerp(CharacterTransform.localRotation, rotation, Time.deltaTime * 2);
-        CharacterTransform.localPosition = Vector3.Lerp(startPos, pos, 1 - (remainingDistance / distance));
-        remainingDistance -= anim.GetFloat("walkBlend") * Time.deltaTime;
-        if (remainingDistance > 2)
-        {
-          anim.SetFloat("walkBlend", JogSpeed, 0.4f, Time.deltaTime);
-        }
-        else if (remainingDistance > 0.2f)
-        {
-          anim.SetFloat("walkBlend", WalkSpeed, 0.2f, Time.deltaTime);
-        }
-        else
-        {
-          anim.SetFloat("walkBlend", 0f, 0.2f, Time.deltaTime);
-          if (anim.GetFloat("walkBlend") < 0.000001f)
-          {
-            anim.SetFloat("walkBlend", 0f);
-            CharacterTransform.localPosition = pos;
-          }
-        }
-        yield return new WaitForFixedUpdate();
+        anim.SetFloat("walkBlend", JogSpeed, 0.4f, Time.deltaTime);
       }
-      anim.SetFloat("walkBlend", 0f);
+      else if (remainingDistance > 0.2f)
+      {
+        anim.SetFloat("walkBlend", WalkSpeed, 0.2f, Time.deltaTime);
+      }
+      else
+      {
+        anim.SetFloat("walkBlend", 0f, 0.2f, Time.deltaTime);
+        if (anim.GetFloat("walkBlend") < 0.000001f)
+        {
+          anim.SetFloat("walkBlend", 0f);
+          CharacterTransform.localPosition = pos;
+          remainingDistance = 0;
+        }
+      }
+      yield return new WaitForFixedUpdate();
     }
+    anim.SetFloat("walkBlend", 0f);
+    CharacterTransform.localPosition = pos;
+    remainingDistance = 0;
+    Log("Finished Moving");
   }
+
 
   public void SetMovingDesitination(GameObject target, bool backwards = false)
   {
@@ -101,12 +99,13 @@ public class CrewNav : MonoBehaviour
     Vector3 startPos = CharacterTransform.localPosition;
     float distance = Vector3.Distance(startPos, pos);
     remainingDistance = distance;
-    
+
     anim.SetBool("idle", false);
     if (backwards)
     {
       anim.SetBool("backup", true);
-    } else
+    }
+    else
     {
       anim.SetBool("walk", true);
     }

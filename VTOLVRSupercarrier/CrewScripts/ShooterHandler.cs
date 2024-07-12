@@ -45,14 +45,12 @@ public class ShooterHandler : MonoBehaviour
   private void OnEnable()
   {
     anim = GetComponent<Animator>();
-    Log("HandlerAnim: " + anim);
     foreach (Transform cat in transform.parent.parent.parent.Find("NavPoints"))
     {
       Log(cat.gameObject);
       Catapults.Add(cat.gameObject);
     }
     state = AlignmentState.None;
-    //navAgent.SetDestination(Catapults[0].transform.GetChild(1).localPosition);
     Manager.StartAlignment += startAlign;
     Log("ShooterHandler Enable Finish");
   }
@@ -77,6 +75,7 @@ public class ShooterHandler : MonoBehaviour
             anim.SetBool("align", false);
             anim.SetBool("bar", true);
             state = AlignmentState.LaunchBar;
+            Log("Launch bar");
           }
         }
         break;
@@ -86,6 +85,7 @@ public class ShooterHandler : MonoBehaviour
           state = AlignmentState.Wings;
           anim.SetBool("bar", false);
           anim.SetBool("wings", true);
+          Log("Wings");
         }
         break;
       case AlignmentState.Wings:
@@ -97,6 +97,9 @@ public class ShooterHandler : MonoBehaviour
           {
             navAgent.SetDestination(idlePoint.localPosition);
             state = AlignmentState.Hook;
+            Log("Hook");
+            Log((hookPoint.transform.position - agent.transform.position).normalized);
+            Log(hookPoint.transform.position);
           }
         }
         break;
@@ -110,6 +113,9 @@ public class ShooterHandler : MonoBehaviour
           {
             anim.SetBool("align", false);
             state = AlignmentState.LaunchReady;
+            Log("Launch Ready");
+            Log((hookPoint.transform.position - agent.transform.position).normalized);
+            Log(hookPoint.transform.position);
           }
         }
         break;
@@ -119,6 +125,9 @@ public class ShooterHandler : MonoBehaviour
         {
           anim.SetBool("runup", true);
           state = AlignmentState.Runup;
+          Log("Run up");
+          Log((hookPoint.transform.position - agent.transform.position).normalized);
+          Log(hookPoint.transform.position);
         }   
         break;
       case AlignmentState.Runup:
@@ -133,6 +142,7 @@ public class ShooterHandler : MonoBehaviour
           state = AlignmentState.Launch;
           anim.SetBool("runup", false);
           anim.SetBool("launch", true);
+          Log("Launch");
         }
         break;
       case AlignmentState.Launch:
@@ -140,6 +150,7 @@ public class ShooterHandler : MonoBehaviour
         {
           anim.SetBool("launch", false);
           state = AlignmentState.None;
+          Log("Launch Complete");
         }
         break;
     }
@@ -173,7 +184,7 @@ public class ShooterHandler : MonoBehaviour
 		lookPos = t.position - agent.transform.position;
 		lookPos.y = 0;
 		rotation = Quaternion.LookRotation(lookPos);
-		Debug.Log(rotation);
+		//Debug.Log(rotation);
 		agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, rotation, Time.deltaTime * 2);
 	}
 
