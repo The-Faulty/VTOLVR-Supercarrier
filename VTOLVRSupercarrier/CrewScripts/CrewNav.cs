@@ -24,7 +24,7 @@ public class CrewNav : MonoBehaviour
     Log("Walk Speed - " + WalkSpeed);
     Log("Jog Speed - " + JogSpeed);
     WalkSpeed = 1.5f;
-    JogSpeed = 3f;
+    JogSpeed = 2.5f;
     BackupSpeed = 1f;
     anim = GetComponent<Animator>();
     Debug.Log(anim);
@@ -47,8 +47,6 @@ public class CrewNav : MonoBehaviour
     float distance = Vector3.Distance(startPos, pos);
     remainingDistance = distance;
 
-    anim.SetBool("jog", true);
-    anim.SetBool("idle", false);
     while (remainingDistance > 0)
     {
       lookPos = pos - CharacterTransform.localPosition;
@@ -56,19 +54,35 @@ public class CrewNav : MonoBehaviour
       rotation = Quaternion.LookRotation(lookPos);
       CharacterTransform.localRotation = Quaternion.Slerp(CharacterTransform.localRotation, rotation, Time.deltaTime * 2);
       CharacterTransform.localPosition = Vector3.Lerp(startPos, pos, 1 - (remainingDistance / distance));
-      if (remainingDistance > 2)
+      while (remainingDistance > 0f)
       {
-        remainingDistance -= JogSpeed * Time.deltaTime;
-      } else
-      {
-        anim.SetBool("jog", false);
-        anim.SetBool("walk", true);
-        remainingDistance -= WalkSpeed * Time.deltaTime;
+        lookPos = pos - CharacterTransform.localPosition;
+        lookPos.y = 0;
+        rotation = Quaternion.LookRotation(lookPos);
+        CharacterTransform.localRotation = rotation; //Quaternion.Slerp(CharacterTransform.localRotation, rotation, Time.deltaTime * 2);
+        CharacterTransform.localPosition = Vector3.Lerp(startPos, pos, 1 - (remainingDistance / distance));
+        remainingDistance -= anim.GetFloat("walkBlend") * Time.deltaTime;
+        if (remainingDistance > 2)
+        {
+          anim.SetFloat("walkBlend", JogSpeed, 0.4f, Time.deltaTime);
+        }
+        else if (remainingDistance > 0.2f)
+        {
+          anim.SetFloat("walkBlend", WalkSpeed, 0.2f, Time.deltaTime);
+        }
+        else
+        {
+          anim.SetFloat("walkBlend", 0f, 0.2f, Time.deltaTime);
+          if (anim.GetFloat("walkBlend") < 0.000001f)
+          {
+            anim.SetFloat("walkBlend", 0f);
+            CharacterTransform.localPosition = pos;
+          }
+        }
+        yield return new WaitForFixedUpdate();
       }
-      yield return new WaitForFixedUpdate();
+      anim.SetFloat("walkBlend", 0f);
     }
-    anim.SetBool("walk", false);
-    anim.SetBool("idle", true);
   }
 
   public void SetMovingDesitination(GameObject target, bool backwards = false)

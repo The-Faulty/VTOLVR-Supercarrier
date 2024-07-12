@@ -33,8 +33,8 @@ public class ShooterHandler : MonoBehaviour
     None,
     Taxi,
     LaunchBar,
-    Hook,
     Wings,
+    Hook,
     LaunchReady,
     Runup,
     Launch
@@ -61,73 +61,68 @@ public class ShooterHandler : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-    Vector3 lookPos;
-    Quaternion rotation;
     switch (state)
     {
-      case (AlignmentState.Taxi):
+      case AlignmentState.Taxi:
         if (navAgent.remainingDistance < .3)
         {
-          lookPos = hookPoint.transform.position - agent.transform.position;
-          lookPos.y = 0;
-          rotation = Quaternion.LookRotation(lookPos);
-          agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, rotation, Time.deltaTime * 2);
+          lookAt(hookPoint.transform);
           //do alignment stuff
+          anim.SetBool("align", true);
           Align();
 
           if ((hookTarget.transform.position - hookPoint.transform.position).sqrMagnitude < 1.5 && Vector3.Dot(hookPoint.transform.forward, hookTarget.forward) > 0.5f)
           {
-            //Log("Bar");
-            anim.SetBool("left", false);
-            anim.SetBool("right", false);
-            anim.SetBool("forward", false);
+            //add stop animation here
+            anim.SetBool("align", false);
             anim.SetBool("bar", true);
             state = AlignmentState.LaunchBar;
           }
         }
         break;
-      case (AlignmentState.LaunchBar):
+      case AlignmentState.LaunchBar:
         if (catHook.deployed)
         {
-          Log("Hook");
-          state = AlignmentState.Hook;
-          anim.SetBool("bar", false);
-
-          anim.SetBool("forward", true);
-        }
-        break;
-      case (AlignmentState.Hook):
-        Align();
-        if ((hookTarget.transform.position - hookPoint.transform.position).sqrMagnitude < 0.36f && Vector3.Dot(hookPoint.transform.forward, hookTarget.forward) > 0.5f)
-        {
-          anim.SetBool("left", false);
-          anim.SetBool("right", false);
-          anim.SetBool("forward", false);
-          anim.SetBool("wings", true);
           state = AlignmentState.Wings;
+          anim.SetBool("bar", false);
+          anim.SetBool("wings", true);
         }
         break;
-      case (AlignmentState.Wings):
+      case AlignmentState.Wings:
         if (!Vehicle.wingFolder.deployed)
         {
           anim.SetBool("wings", false);
-          navAgent.SetDestination(idlePoint.localPosition);
-          state = AlignmentState.LaunchReady;
+          lookAt(idlePoint);
+          if (waitForSeconds(2f))
+          {
+            navAgent.SetDestination(idlePoint.localPosition);
+            state = AlignmentState.Hook;
+          }
         }
         break;
-      case (AlignmentState.LaunchReady):
-        if (navAgent.remainingDistance < .3)
+      case AlignmentState.Hook:
+        if (navAgent.remainingDistance < .3f)
+        {
+          lookAt(hookPoint.transform);
+          anim.SetBool("align", true);
+          Align();
+          if ((hookTarget.transform.position - hookPoint.transform.position).sqrMagnitude < 0.36f && Vector3.Dot(hookPoint.transform.forward, hookTarget.forward) > 0.5f)
+          {
+            anim.SetBool("align", false);
+            state = AlignmentState.LaunchReady;
+          }
+        }
+        break;
+      case AlignmentState.LaunchReady:
+        lookAt(hookPoint.transform);
+        if (waitForSeconds(6f))
         {
           anim.SetBool("runup", true);
           state = AlignmentState.Runup;
-        }
+        }   
         break;
-      case (AlignmentState.Runup):
-        lookPos = hookPoint.transform.position - agent.transform.position;
-        lookPos.y = 0;
-        rotation = Quaternion.LookRotation(lookPos);
-        agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, rotation, Time.deltaTime * 2);
-
+      case AlignmentState.Runup:
+        //lookAt(hookPoint.transform);
         bool flag = true;
         foreach (ModuleEngine engine in Engines)
         {
@@ -140,6 +135,13 @@ public class ShooterHandler : MonoBehaviour
           anim.SetBool("launch", true);
         }
         break;
+      case AlignmentState.Launch:
+        if (waitForSeconds(10f))
+        {
+          anim.SetBool("launch", false);
+          state = AlignmentState.None;
+        }
+        break;
     }
   }
 
@@ -147,42 +149,33 @@ public class ShooterHandler : MonoBehaviour
   void Align()
   {
     float relativeAngle = Vector2.SignedAngle(new Vector2(hookTarget.forward.x, hookTarget.forward.z), new Vector2((hookTarget.position - planeCOM.position).x, (hookTarget.position - planeCOM.position).z));
-    if (relativeAngle > 5)
+    if (relativeAngle > 2.5f)
     {
-      left();
+      //indicator.text = "Left";
+      anim.SetFloat("alignBlend", -1, 0.3f, Time.deltaTime);
     }
-    else if (relativeAngle < -5)
+    else if (relativeAngle < -2.5f)
     {
-      right();
+      //indicator.text = "Right";
+      anim.SetFloat("alignBlend", 1, 0.3f, Time.deltaTime);
     }
     else
     {
-      forward();
+      //indicator.text = "Forward";
+      anim.SetFloat("alignBlend", 0, 0.3f, Time.deltaTime);
     }
   }
 
-  void forward()
-  {
-    anim.SetBool("left", false);
-    anim.SetBool("right", false);
-    anim.SetBool("forward", true);
-  }
-
-  void right()
-  {
-    //Log("right");
-    anim.SetBool("left", false);
-    anim.SetBool("right", true);
-    anim.SetBool("forward", false);
-  }
-
-  void left()
-  {
-    //Log("left");
-    anim.SetBool("left", true);
-    anim.SetBool("right", false);
-    anim.SetBool("forward", false);
-  }
+  void lookAt(Transform t)
+	{
+		Vector3 lookPos;
+		Quaternion rotation;
+		lookPos = t.position - agent.transform.position;
+		lookPos.y = 0;
+		rotation = Quaternion.LookRotation(lookPos);
+		Debug.Log(rotation);
+		agent.transform.rotation = Quaternion.Slerp(agent.transform.rotation, rotation, Time.deltaTime * 2);
+	}
 
   [ContextMenu("Trigger Align")]
   void AlignTrigger()
@@ -192,9 +185,7 @@ public class ShooterHandler : MonoBehaviour
     navAgent.SetDestination(alignPoint.localPosition);
     state = AlignmentState.Taxi;
     isIdle = !isIdle;
-    anim.SetBool("left", false);
-    anim.SetBool("right", false);
-    anim.SetBool("forward", false);
+    anim.SetBool("align", false);
     anim.SetBool("bar", false);
     anim.SetBool("runup", false);
     anim.SetBool("launch", false);
@@ -225,6 +216,26 @@ public class ShooterHandler : MonoBehaviour
 
       AlignTrigger();
     }
+  }
+
+  private float startTime = 0;
+  private float wait = 0;
+  private bool waiting = false;
+  private bool waitForSeconds(float waitTime)
+  {
+    if (waiting)
+    {
+      if (Time.time - startTime > wait)
+      {
+        waiting = false;
+        return true;
+      }
+      return false;
+    }
+    startTime = Time.time;
+    wait = waitTime;
+    waiting = true;
+    return false;
   }
 
   void onHook()
