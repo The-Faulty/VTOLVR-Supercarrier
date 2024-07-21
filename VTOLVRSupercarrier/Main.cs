@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 using VTOLAPI;
 using Mod_Loader.Classes;
 using System.IO;
+using VTOLVRSupercarrier.CrewScripts;
 
 namespace VTOLVRSupercarrier
 {
@@ -26,37 +27,27 @@ namespace VTOLVRSupercarrier
     public void Awake()
     {
       ModFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-      StartCoroutine(loadIndicatorAsync());
+      StartCoroutine(LoadIndicatorAsync());
       VTAPI.SceneLoaded += SceneChanged;
       VTAPI.MissionReloaded += MissionReloaded;
       SceneManager.sceneUnloaded += SceneUnload;
     }
 
-    private IEnumerator loadIndicatorAsync() //thank you NotBDArmory github
+    private IEnumerator LoadIndicatorAsync() //thank you NotBDArmory github
     {
+      Log("Loading Asset Bundle");
       AssetBundleCreateRequest a = AssetBundle.LoadFromFileAsync(ModFolder + "/carriercrew.assets");
       yield return a;
       AssetBundle bundle = a.assetBundle;
-      AssetBundleRequest handler = bundle.LoadAssetAsync("CarrierCrew.prefab");
+      AssetBundleRequest handler = bundle.LoadAssetAsync("carriercrew.prefab");
       yield return handler;
       if (handler.asset == null)
       {
         Log("Couldn't find carrier crew");
       }
+      Log("Asset Bundle Loaded");
       CarrierCrew = Instantiate(handler.asset as GameObject);
       CarrierCrew.name = "CarrierCrew";
-      Transform Shooter = CarrierCrew.transform.Find("Crew/Shooter").transform;
-      GameObject ShooterMain = Shooter.transform.Find("DeckCrewLights").gameObject;
-
-      CrewManager crewManager = CarrierCrew.AddComponent<CrewManager>();
-
-      ShooterHandler shooterHandler = ShooterMain.AddComponent<ShooterHandler>();
-      shooterHandler.agent = Shooter;
-      shooterHandler.Manager = crewManager;
-
-      CrewNav nav = ShooterMain.AddComponent<CrewNav>();
-      nav.CharacterTransform = Shooter;
-      shooterHandler.navAgent = nav;
 
       bundle.Unload(false);
       DontDestroyOnLoad(CarrierCrew);
@@ -85,7 +76,7 @@ namespace VTOLVRSupercarrier
           clone.transform.parent = actor.gameObject.GetComponent<Transform>();
           clone.transform.localPosition = new Vector3(0, 23.98f, 0);
           clone.transform.localEulerAngles = new Vector3(0, 0, 0);
-          clone.transform.GetComponentInChildren<CrewManager>().carrier = actor.gameObject.GetComponent<AICarrierSpawn>();
+          //clone.transform.GetComponentInChildren<CrewManager>().carrier = actor.gameObject.GetComponent<AICarrierSpawn>();
           clone.SetActive(true);
           Log("Added " + clone + " to " + actor);
         }
@@ -121,8 +112,7 @@ namespace VTOLVRSupercarrier
     }
     
 
-    //rename to addTakeoffRequest
-    public static void setPlayerCat(AICarrierSpawn instance, CarrierCatapult cat, GameObject vehicle = null)
+    /*public static void setPlayerCat(AICarrierSpawn instance, CarrierCatapult cat, GameObject vehicle = null)
     {
       //(might be fixed) Need logic here to check which carrier the player requested from and then assign to specific deck crew
       GameObject localCarrier = instance.gameObject;
@@ -132,12 +122,6 @@ namespace VTOLVRSupercarrier
 
       manager.takeoffRequest(cat, vehicle);
       Log("setPlayerCat Over");
-    }
-
-    /*public static void afterHook()
-    {
-      Log("afterHook");
-      //AlignIndicator.SetActive(false);
     }*/
 
     public override void UnLoad()

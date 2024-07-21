@@ -22,7 +22,7 @@ public class ExtendCatapultLaunch
 }*/
 
 //[HarmonyPatch(typeof(AirportManager), nameof(AirportManager.PlayerRequestTakeoff))]
-[HarmonyPatch(typeof(AICarrierSpawn), nameof(AICarrierSpawn.RegisterPlayerTakeoffRequest))]
+/*[HarmonyPatch(typeof(AICarrierSpawn), nameof(AICarrierSpawn.RegisterPlayerTakeoffRequest))]
 public class AICarrierSpawnPatch
 {
   public static void Postfix(AICarrierSpawn __instance, CarrierCatapult __result)
@@ -38,7 +38,7 @@ public class AICarrierSpawnPatch
       Debug.Log("AICarrierSpawnPatch: No catapult returned");
     }
   }
-}
+}*/
 
 //this is kinda cursed but I can't do anything about it
 [HarmonyPatch(typeof(CarrierCatapult), nameof(CarrierCatapult.Hook))]
@@ -47,8 +47,6 @@ public class CarrierCatapultPatch
   private static bool Prefix(CarrierCatapult __instance, CatapultHook hook, ref CatapultHook ___hook, ref Transform ___planeHookTransform, ref Rigidbody ___planeRb, ref FlightInfo ___flightInfo)
   {
     Log("Attempting to hook");
-    Log("Traverse created");
-    Log(__instance.hooked);
     if (!__instance.hooked)
     {
       __instance.hooked = true;
@@ -78,6 +76,7 @@ public class CarrierCatapultPatch
     traverse.Field("catapultTransform").Property("position").SetValue(__instance.WorldPos(traverse.Field("readyPos").GetValue<Vector3>())); //catapultTransform.position = __instance.WorldPos(readyPos);
     __instance.CreateJoint();
     FloatingOrigin.instance.AddRigidbody((Rigidbody)traverse.Field("catRb").GetValue());
+    yield return new WaitForSeconds(2f);
     Log("CarrierCatapultNew: Begin ReadyRoutine");
     yield return __instance.StartCoroutine(__instance.ReadyRoutine());
 

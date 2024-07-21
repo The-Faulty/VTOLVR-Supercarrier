@@ -55,5 +55,6 @@
   </ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="xcopy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\VTOL VR\@Mod Loader\Mods\VTOLVRSupercarrier\&quot; /i /y" />
+		<Exec Command="xcopy &quot;$(TargetPath)&quot; &quot;D:\Unity\VTOL-Math\Assets\Dependencies&quot; /i /y" />
 	</Target>
 </Project>
