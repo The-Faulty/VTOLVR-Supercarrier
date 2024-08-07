@@ -46,6 +46,8 @@ namespace VTOLVRSupercarrier.CrewScripts
       }
     }
 
+    private Coroutine routine;
+
     void OnEnable()
     {
       designation = 4;
@@ -80,6 +82,9 @@ namespace VTOLVRSupercarrier.CrewScripts
       if (mc && mc.manager == this)
       {
         Destroy(other.gameObject.GetComponentInParent<ManagedCatapult>());
+        StopCoroutine(routine);
+        state = AlignmentState.None;
+        Reset?.Invoke();
       }
     }
 
@@ -100,7 +105,7 @@ namespace VTOLVRSupercarrier.CrewScripts
 
       state = AlignmentState.Taxi;
       OnTaxi?.Invoke();
-      StartCoroutine(AlignRoutine());
+      routine = StartCoroutine(AlignRoutine());
     }
 
     private IEnumerator AlignRoutine()
@@ -139,7 +144,7 @@ namespace VTOLVRSupercarrier.CrewScripts
             }
             break;
           case AlignmentState.Hook:
-            if ((hookTarget.transform.position - hookPoint.transform.position).sqrMagnitude < 0.36f && Vector3.Dot(hookPoint.transform.forward, hookTarget.forward) > 0.5f)
+            if (((hookTarget.transform.position - hookPoint.transform.position).sqrMagnitude < 0.36f && Vector3.Dot(hookPoint.transform.forward, hookTarget.forward) > 0.5f) || vehicle.GetComponentInChildren<CatapultHook>().hooked)
             {
               state = AlignmentState.LaunchReady;
               OnLaunchReady?.Invoke();
@@ -167,6 +172,7 @@ namespace VTOLVRSupercarrier.CrewScripts
             yield return new WaitForSeconds(10);
             state = AlignmentState.None;
             vehicle = null;
+            Log("reset");
             Reset?.Invoke();
             break;
         }

@@ -19,9 +19,9 @@ namespace VTOLVRSupercarrier.CrewScripts
     {
       base.OnEnable();
 
-      alignPoint = catapultManager.navPoints.directorAlignPoint.transform;
-      mainPoint = catapultManager.navPoints.directorMainPoint.transform;
-      Log("DirectorHandler Enable Finish");
+      alignPoint = catapultManager.navPoints.directorAlignPoint;
+      mainPoint = catapultManager.navPoints.directorMainPoint;
+      //Log("Enable Finish");
     }
 
     protected override void OnTaxi()
@@ -39,7 +39,7 @@ namespace VTOLVRSupercarrier.CrewScripts
       {
         if (navAgent.remainingDistance < 0.3f)
         {
-          Align();
+          Align(catapultManager.navPoints.preHookAlignPoint);
         }
 
         yield return new WaitForFixedUpdate();
@@ -74,7 +74,7 @@ namespace VTOLVRSupercarrier.CrewScripts
         {
           anim.SetBool("align", true);
           LookAt(catapultManager.hookPoint.transform);
-          Align();
+          Align(catapultManager.hookTarget);
         }
         yield return new WaitForFixedUpdate();
       }
@@ -96,14 +96,14 @@ namespace VTOLVRSupercarrier.CrewScripts
     protected override void Reset()
     {
       ResetAnimVars();
-      navAgent.SetDestination(mainPoint.localPosition);
+      StopAllCoroutines();
+      navAgent.SetDestination(alignPoint.localPosition);
+      Log("reset");
     }
 
-
-    //******make close and far for launch bar deployment
-    void Align()
+    void Align(Transform target)
     {
-      float relativeAngle = Vector2.SignedAngle(new Vector2(catapultManager.hookTarget.forward.x, catapultManager.hookTarget.forward.z), new Vector2((catapultManager.hookTarget.position - catapultManager.planeCOM.position).x, (catapultManager.hookTarget.position - catapultManager.planeCOM.position).z));
+      float relativeAngle = Vector2.SignedAngle(new Vector2(target.forward.x, target.forward.z), new Vector2((target.position - catapultManager.planeCOM.position).x, (target.position - catapultManager.planeCOM.position).z));
       if (relativeAngle > 2.5f)
       {
         anim.SetFloat("alignBlend", -1, 0.3f, Time.deltaTime);
@@ -127,7 +127,7 @@ namespace VTOLVRSupercarrier.CrewScripts
 
     private void Log(object text)
     {
-      Debug.Log("ShooterHandler: " + text);
+      Debug.Log("DirectorHandler: " + text);
     }
   }
 }

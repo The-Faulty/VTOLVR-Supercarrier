@@ -1,0 +1,14 @@
+{
+  "Title": "VTOLVR Supercarrier",
+  "Description": "This is an alpha build, shit don't work that well",
+  "PreviewImageUrl": "https://raw.githubusercontent.com/The-Faulty/VTOLVR-Supercarrier/main/Builds/thumbnail.png",
+  "MetaData": {
+    "DllName": "VTOLVRSupercarrier.dll",
+    "AllowLoadOnStart": true,
+    "ShowOnMainList": true,
+    "DllHash": ""
+  },
+  "DependenciesIds": [
+    3265689427
+  ]
+}

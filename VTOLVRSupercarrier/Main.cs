@@ -51,7 +51,6 @@ namespace VTOLVRSupercarrier
 
       bundle.Unload(false);
       DontDestroyOnLoad(CarrierCrew);
-      Log(CarrierCrew);
       Log("Carrier crew loaded");
       CarrierCrew.SetActive(false);
       yield break;
@@ -86,10 +85,10 @@ namespace VTOLVRSupercarrier
       yield break;
     }
 
-    private void SceneChanged(VTOLScenes scenes) 
+    private void SceneChanged(VTScenes scenes) 
     {
       Log("Scene changed");
-      if (scenes == VTOLScenes.Akutan || scenes == VTOLScenes.CustomMapBase || scenes == VTOLScenes.CustomMapBase_OverCloud) // If inside of a scene that you can fly in
+      if (scenes == VTScenes.Akutan || scenes == VTScenes.CustomMapBase || scenes == VTScenes.CustomMapBase_OverCloud) // If inside of a scene that you can fly in
       {
         Log("Flight Scene");
         StartCoroutine(loadSupercarrier());
@@ -127,6 +126,7 @@ namespace VTOLVRSupercarrier
     public override void UnLoad()
     {
       // Unload
+      Destroy(CarrierCrew);
     }
     //Override the VTOLMOD.Log function because it doesn't work with static methods
     private static void Log(object text)
