@@ -12,6 +12,7 @@ namespace VTOLVRSupercarrier.CrewScripts
 
     public Transform mainPoint;
     public Transform alignPoint;
+    public Transform landingPoint;
 
     private bool isIdle = true;
 
@@ -21,6 +22,7 @@ namespace VTOLVRSupercarrier.CrewScripts
 
       alignPoint = catapultManager.navPoints.directorAlignPoint;
       mainPoint = catapultManager.navPoints.directorMainPoint;
+      landingPoint = catapultManager.navPoints.directorLandPoint;
       //Log("Enable Finish");
     }
 
@@ -98,7 +100,11 @@ namespace VTOLVRSupercarrier.CrewScripts
       ResetAnimVars();
       StopAllCoroutines();
       navAgent.SetDestination(alignPoint.localPosition);
-      Log("reset");
+    }
+
+    protected override void OnLanding()
+    {
+      navAgent.SetDestination(landingPoint.localPosition);
     }
 
     void Align(Transform target)

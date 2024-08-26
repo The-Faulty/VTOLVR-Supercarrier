@@ -108,5 +108,9 @@ namespace VTOLVRSupercarrier.CrewScripts
     {
       return;
     }
+    protected virtual void OnLanding()
+    {
+      return;
+    }
   }
 }

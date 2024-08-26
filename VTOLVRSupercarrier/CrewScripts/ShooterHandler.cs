@@ -10,6 +10,7 @@ namespace VTOLVRSupercarrier.CrewScripts
   {
     public Transform idlePoint;
     public Transform mainPoint;
+    public Transform landingPoint;
 
     private bool isIdle = true;
 
@@ -19,6 +20,7 @@ namespace VTOLVRSupercarrier.CrewScripts
 
       mainPoint = catapultManager.navPoints.shooterMainPoint;
       idlePoint = catapultManager.navPoints.shooterIdlePoint;
+      landingPoint = catapultManager.navPoints.shooterLandPoint;
       //Log("Enable Finish");
       //Log(GetComponentInChildren<SkinnedMeshRenderer>().material.shader);
     }
@@ -66,6 +68,10 @@ namespace VTOLVRSupercarrier.CrewScripts
       isIdle = true;
     }
 
+    protected override void OnLanding()
+    {
+      navAgent.SetDestination(landingPoint.localPosition);
+    }
     private void ResetAnimVars()
     {
       anim.SetBool("runup", false);

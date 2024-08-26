@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace VTOLVRSupercarrier.CrewScripts
 {
-  class ManagedCatapult : MonoBehaviour
+  public class ManagedCatapult : MonoBehaviour
   {
     public CatapultCrewManager manager;
   }

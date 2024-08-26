@@ -17,11 +17,11 @@ namespace VTOLVRSupercarrier.CrewScripts
 
     public BoxCollider AlignTrigger;
 
-    public CrewManager crewManager;
+    public ManagedCatapult player;
     public NavPoints navPoints;
     public int designation;
 
-    public event Action OnTaxi, OnLaunchBar, OnWings, OnHook, OnLaunchReady, OnRunup, OnLaunch, Reset;
+    public event Action OnTaxi, OnLaunchBar, OnWings, OnHook, OnLaunchReady, OnRunup, OnLaunch, OnLanding, Reset;
 
     public enum AlignmentState
     {
@@ -70,8 +70,8 @@ namespace VTOLVRSupercarrier.CrewScripts
       VehicleMaster vm = other.gameObject.GetComponentInParent<VehicleMaster>();
       if (vm && vehicle == null && state == AlignmentState.None)
       {
-        ManagedCatapult mc = vm.gameObject.AddComponent<ManagedCatapult>();
-        mc.manager = this;
+        player = vm.gameObject.AddComponent<ManagedCatapult>();
+        player.manager = this;
         StartAlign(other.gameObject.GetComponentInParent<VehicleMaster>());
       }
     }
@@ -79,12 +79,10 @@ namespace VTOLVRSupercarrier.CrewScripts
     private void OnTriggerExit(Collider other)
     {
       ManagedCatapult mc = other.gameObject.GetComponentInParent<ManagedCatapult>();
-      if (mc && mc.manager == this)
+      if (mc && mc == player && mc.manager == this)
       {
-        Destroy(other.gameObject.GetComponentInParent<ManagedCatapult>());
-        StopCoroutine(routine);
-        state = AlignmentState.None;
-        Reset?.Invoke();
+        Destroy(player);
+        ResetTrigger();
       }
     }
 
@@ -178,6 +176,22 @@ namespace VTOLVRSupercarrier.CrewScripts
         }
         yield return new WaitForFixedUpdate();
       }
+    }
+
+    public void LandingTrigger()
+    {
+      if (designation > 2 && state == AlignmentState.None)
+      {
+        OnLanding?.Invoke();
+      }
+    }
+
+    public void ResetTrigger()
+    {
+      player = null;
+      StopCoroutine(routine);
+      state = AlignmentState.None;
+      Reset?.Invoke();
     }
 
     private void Log(object text)
