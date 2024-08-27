@@ -23,7 +23,7 @@ namespace VTOLVRSupercarrier.CrewScripts
       alignPoint = catapultManager.navPoints.directorAlignPoint;
       mainPoint = catapultManager.navPoints.directorMainPoint;
       landingPoint = catapultManager.navPoints.directorLandPoint;
-      //Log("Enable Finish");
+      //logger.Log("Enable Finish");
     }
 
     protected override void OnTaxi()
@@ -129,11 +129,6 @@ namespace VTOLVRSupercarrier.CrewScripts
       anim.SetBool("align", false);
       anim.SetBool("bar", false);
       anim.SetBool("launch", false);
-    }
-
-    private void Log(object text)
-    {
-      Debug.Log("DirectorHandler: " + text);
     }
   }
 }

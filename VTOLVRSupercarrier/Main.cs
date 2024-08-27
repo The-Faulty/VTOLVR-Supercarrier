@@ -133,6 +133,5 @@ namespace VTOLVRSupercarrier
     {
       Debug.Log("VTOLVR-Supercarrier: " + text);
     }
-
   }
 }

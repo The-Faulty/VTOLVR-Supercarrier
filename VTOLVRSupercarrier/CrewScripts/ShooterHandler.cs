@@ -21,8 +21,8 @@ namespace VTOLVRSupercarrier.CrewScripts
       mainPoint = catapultManager.navPoints.shooterMainPoint;
       idlePoint = catapultManager.navPoints.shooterIdlePoint;
       landingPoint = catapultManager.navPoints.shooterLandPoint;
-      //Log("Enable Finish");
-      //Log(GetComponentInChildren<SkinnedMeshRenderer>().material.shader);
+      //logger.Log("Enable Finish");
+      //logger.Log(GetComponentInChildren<SkinnedMeshRenderer>().material.shader);
     }
 
     [ContextMenu("OnTaxi")]
@@ -64,7 +64,7 @@ namespace VTOLVRSupercarrier.CrewScripts
       ResetAnimVars();
       StopAllCoroutines();
       navAgent.SetDestination(idlePoint.localPosition);
-      Log("reset");
+      logger.Log("reset");
       isIdle = true;
     }
 
@@ -76,11 +76,6 @@ namespace VTOLVRSupercarrier.CrewScripts
     {
       anim.SetBool("runup", false);
       anim.SetBool("launch", false);
-    }
-
-    private void Log(object text)
-    {
-      Debug.Log("ShooterHandler: " + text);
     }
   }
 }

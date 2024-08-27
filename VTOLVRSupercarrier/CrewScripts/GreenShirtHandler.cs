@@ -9,7 +9,6 @@ namespace VTOLVRSupercarrier.CrewScripts
 {
   class GreenShirtHandler : DeckCrew
   {
-
     public Transform idlePoint;
     public Transform mainPoint;
     public Transform alignPoint;
@@ -25,7 +24,7 @@ namespace VTOLVRSupercarrier.CrewScripts
       alignPoint = catapultManager.navPoints.greenAlignPoint;
       mainPoint = catapultManager.navPoints.greenMainPoint;
       landingPoint = catapultManager.navPoints.greenLandPoint;
-      //Log("Enable Finish");
+      //logger.Log("Enable Finish");
     }
 
     protected override void OnTaxi()
@@ -71,7 +70,7 @@ namespace VTOLVRSupercarrier.CrewScripts
       ResetAnimVars();
       StopAllCoroutines();
       navAgent.SetDestination(idlePoint.localPosition);
-      Log("reset");
+      logger.Log("reset");
     }
     protected override void OnLanding()
     {
@@ -81,11 +80,6 @@ namespace VTOLVRSupercarrier.CrewScripts
     {
       anim.SetBool("bar", false);
       anim.SetBool("launch", false);
-    }
-
-    private void Log(object text)
-    {
-      Debug.Log("GreenShirtHandler: " + text);
     }
   }
 }

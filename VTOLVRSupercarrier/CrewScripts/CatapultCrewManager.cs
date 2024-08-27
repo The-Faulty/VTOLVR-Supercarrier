@@ -32,37 +32,51 @@ namespace VTOLVRSupercarrier.CrewScripts
       Hook,
       LaunchReady,
       Runup,
-      Launch
+      Launch,
+      Landing
     }
 
     private AlignmentState _alignmentState = AlignmentState.None;
+    private CarrierLogger logger;
+
     public AlignmentState state
     {
       get => _alignmentState;
       set
       {
         _alignmentState = value;
-        Log("New state: " + value);
+        logger.Log("New state: " + value);
       }
     }
 
     private Coroutine routine;
 
+    void OnStart()
+    {
+      logger = new CarrierLogger(this);
+    }
     void OnEnable()
     {
-      designation = 4;
-      navPoints = GetComponentInChildren<NavPoints>();
-      CarrierCatapultManager catapultManager = GetComponentInParent<CarrierCatapultManager>();
-      foreach (CarrierCatapult cat in catapultManager.catapults)
+      if (logger == null)
       {
-        Log(cat.catapultDesignation);
-        if (cat.catapultDesignation == designation)
+        logger = new CarrierLogger(this);
+      }
+      //designation = 4;
+      navPoints = GetComponentInChildren<NavPoints>();
+      state = AlignmentState.None;
+      CarrierCatapultManager catapultManager = GetComponentInParent<CarrierCatapultManager>();
+      if (catapultManager != null)
+      {
+        foreach (CarrierCatapult cat in catapultManager.catapults)
         {
-          hookTarget = cat.catapultTransform;
-          break;
+          logger.Log(cat.catapultDesignation);
+          if (cat.catapultDesignation == designation)
+          {
+            hookTarget = cat.catapultTransform;
+            break;
+          }
         }
       }
-      state = AlignmentState.None;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -88,7 +102,7 @@ namespace VTOLVRSupercarrier.CrewScripts
 
     public void StartAlign(VehicleMaster v)
     {
-      Log("Start Align");
+      logger.Log("Start Align");
 
       vehicle = v;
       engines = vehicle.engines;
@@ -98,8 +112,8 @@ namespace VTOLVRSupercarrier.CrewScripts
       hookPoint = catHook.hookForcePointTransform;
       planeCOM = vehicle.GetComponentInChildren<CenterOfMass>().transform;
 
-      Log(hookPoint);
-      Log(hookTarget);
+      logger.Log(hookPoint);
+      logger.Log(hookTarget);
 
       state = AlignmentState.Taxi;
       OnTaxi?.Invoke();
@@ -170,7 +184,7 @@ namespace VTOLVRSupercarrier.CrewScripts
             yield return new WaitForSeconds(10);
             state = AlignmentState.None;
             vehicle = null;
-            Log("reset");
+            logger.Log("reset");
             Reset?.Invoke();
             break;
         }
@@ -178,25 +192,42 @@ namespace VTOLVRSupercarrier.CrewScripts
       }
     }
 
-    public void LandingTrigger()
+    public void LandingTrigger(VehicleMaster vm = null)
     {
       if (designation > 2 && state == AlignmentState.None)
       {
+        logger.Log("landing");
         OnLanding?.Invoke();
+        state = AlignmentState.Landing;
+        if (vm)
+        {
+          routine = StartCoroutine(LandingRoutine(vm));
+        }
       }
+    }
+
+    private IEnumerator LandingRoutine(VehicleMaster vm)
+    {
+      while (state == AlignmentState.Landing && vm.flightInfo.isLanded == false && vm.pilotIsDead == false)
+      {
+        yield return new WaitForSeconds(1);
+      }
+      ResetTrigger();
     }
 
     public void ResetTrigger()
     {
-      player = null;
-      StopCoroutine(routine);
-      state = AlignmentState.None;
-      Reset?.Invoke();
-    }
-
-    private void Log(object text)
-    {
-      Debug.Log("CatapultCrewManager: " + text);
+      if (state != AlignmentState.None)
+      {
+        logger.Log("reset");
+        player = null;
+        if (routine != null)
+        {
+          StopCoroutine(routine);
+        }
+        state = AlignmentState.None;
+        Reset?.Invoke();
+      }
     }
   }
 }

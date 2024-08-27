@@ -237,7 +237,7 @@ public class OLSUpdatePatch
           CatapultCrewManager[] crews = __instance.GetComponentInParent<AICarrierSpawn>().GetComponentsInChildren<CatapultCrewManager>();
           foreach (var crew in crews)
           {
-            crew.LandingTrigger();
+            crew.LandingTrigger(__instance.playerHook.GetComponentInParent<VehicleMaster>());
           }
           return false;
         }
