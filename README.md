@@ -1,2 +1,3 @@
-# VTOLVR Catapult Alignment
- An alignment indicator for VTOLVR, mainly testing code for a future project.
+# VTOLVR Supercarrier
+
+VTOL VR mod that adds in deck crew
