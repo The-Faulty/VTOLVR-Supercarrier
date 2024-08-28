@@ -19,7 +19,10 @@ namespace VTOLVRSupercarrier.CrewScripts
     public override void OnEnable()
     {
       base.OnEnable();
-
+      if (logger == null)
+      {
+        logger = new CarrierLogger("GreenShirtHandler");
+      }
       idlePoint = catapultManager.navPoints.greenIdlePoint;
       alignPoint = catapultManager.navPoints.greenAlignPoint;
       mainPoint = catapultManager.navPoints.greenMainPoint;
@@ -70,11 +73,12 @@ namespace VTOLVRSupercarrier.CrewScripts
       ResetAnimVars();
       StopAllCoroutines();
       navAgent.SetDestination(idlePoint.localPosition);
-      logger.Log("reset");
+      LookAt(catapultManager.navPoints.preHookAlignPoint);
     }
     protected override void OnLanding()
     {
       navAgent.SetDestination(landingPoint.localPosition);
+      LookAt(mainPoint);
     }
     private void ResetAnimVars()
     {

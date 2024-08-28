@@ -19,7 +19,10 @@ namespace VTOLVRSupercarrier.CrewScripts
     public override void OnEnable()
     {
       base.OnEnable();
-
+      if (logger == null)
+      {
+        logger = new CarrierLogger("DirectorHandler");
+      }
       alignPoint = catapultManager.navPoints.directorAlignPoint;
       mainPoint = catapultManager.navPoints.directorMainPoint;
       landingPoint = catapultManager.navPoints.directorLandPoint;
@@ -100,11 +103,13 @@ namespace VTOLVRSupercarrier.CrewScripts
       ResetAnimVars();
       StopAllCoroutines();
       navAgent.SetDestination(alignPoint.localPosition);
+      LookAt(catapultManager.navPoints.preHookAlignPoint);
     }
 
     protected override void OnLanding()
     {
       navAgent.SetDestination(landingPoint.localPosition);
+      LookAt(mainPoint);
     }
 
     void Align(Transform target)

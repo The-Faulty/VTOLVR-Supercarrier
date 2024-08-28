@@ -17,17 +17,8 @@ namespace VTOLVRSupercarrier.CrewScripts
     protected Animator anim;
     protected CarrierLogger logger;
 
-    public virtual void OnStart()
-    {
-      logger = new CarrierLogger(this);
-    }
-
     public virtual void OnEnable()
     {
-      if (logger == null)
-      {
-        logger = new CarrierLogger(this);
-      }
       anim = GetComponentInChildren<Animator>();
       anim.Play("Idle", 0, Random.Range(0, 1f));
       catapultManager.OnTaxi += OnTaxi;

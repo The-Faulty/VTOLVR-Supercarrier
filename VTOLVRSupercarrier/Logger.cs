@@ -7,10 +7,10 @@ namespace VTOLVRSupercarrier
 {
   public class CarrierLogger
   {
-    private string origin;
+    private object origin;
     public CarrierLogger (object origin)
     {
-      this.origin = nameof(origin);
+      this.origin = origin;
     }
     public void Log(object message)
     {

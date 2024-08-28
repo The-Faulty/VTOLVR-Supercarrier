@@ -245,11 +245,6 @@ public class OLSUpdatePatch
       else
       {
         __instance.displayObject.SetActive(false);
-        CatapultCrewManager[] crews = __instance.GetComponentInParent<AICarrierSpawn>().GetComponentsInChildren<CatapultCrewManager>();
-        foreach (var crew in crews)
-        {
-          crew.ResetTrigger();
-        }
       }
     }
     return false;

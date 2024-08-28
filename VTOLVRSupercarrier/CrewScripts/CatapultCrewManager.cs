@@ -21,6 +21,7 @@ namespace VTOLVRSupercarrier.CrewScripts
     public NavPoints navPoints;
     public int designation;
 
+    public Runway runway;
     public event Action OnTaxi, OnLaunchBar, OnWings, OnHook, OnLaunchReady, OnRunup, OnLaunch, OnLanding, Reset;
 
     public enum AlignmentState
@@ -51,17 +52,14 @@ namespace VTOLVRSupercarrier.CrewScripts
 
     private Coroutine routine;
 
-    void OnStart()
-    {
-      logger = new CarrierLogger(this);
-    }
     void OnEnable()
     {
       if (logger == null)
       {
-        logger = new CarrierLogger(this);
+        logger = new CarrierLogger("CatapultCrewManager");
       }
       //designation = 4;
+      runway = GetComponentInParent<AICarrierSpawn>().runway;
       navPoints = GetComponentInChildren<NavPoints>();
       state = AlignmentState.None;
       CarrierCatapultManager catapultManager = GetComponentInParent<CarrierCatapultManager>();
@@ -81,6 +79,9 @@ namespace VTOLVRSupercarrier.CrewScripts
 
     private void OnTriggerEnter(Collider other)
     {
+      logger.Log("Trigger Enter");
+      logger.Log(state);
+      logger.Log(vehicle);
       VehicleMaster vm = other.gameObject.GetComponentInParent<VehicleMaster>();
       if (vm && vehicle == null && state == AlignmentState.None)
       {
@@ -208,9 +209,15 @@ namespace VTOLVRSupercarrier.CrewScripts
 
     private IEnumerator LandingRoutine(VehicleMaster vm)
     {
+      Actor carrierActor = GetComponentInParent<Actor>();
       while (state == AlignmentState.Landing && vm.flightInfo.isLanded == false && vm.pilotIsDead == false)
       {
         yield return new WaitForSeconds(1);
+      }
+      yield return new WaitForSeconds(4);
+      while (!runway.IsRunwayClear(carrierActor))
+      {
+        yield return new WaitForSeconds(2);
       }
       ResetTrigger();
     }
