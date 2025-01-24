@@ -3,9 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using VTOLAPI;
 
 namespace VTOLVRSupercarrier.CrewScripts
 {
+  public enum AlignmentState
+  {
+    None,
+    Taxi,
+    LaunchBar,
+    Wings,
+    Hook,
+    LaunchReady,
+    Runup,
+    Launch,
+    Landing
+  }
+
   public class CatapultCrewManager : MonoBehaviour
   {
     public Transform hookPoint;
@@ -23,19 +37,8 @@ namespace VTOLVRSupercarrier.CrewScripts
 
     public Runway runway;
     public event Action OnTaxi, OnLaunchBar, OnWings, OnHook, OnLaunchReady, OnRunup, OnLaunch, OnLanding, Reset;
-
-    public enum AlignmentState
-    {
-      None,
-      Taxi,
-      LaunchBar,
-      Wings,
-      Hook,
-      LaunchReady,
-      Runup,
-      Launch,
-      Landing
-    }
+    public event Action<AlignmentState> OnStateChanged;
+    public event Action<VehicleMaster> OnStartAlign;
 
     private AlignmentState _alignmentState = AlignmentState.None;
     private CarrierLogger logger;
@@ -46,6 +49,7 @@ namespace VTOLVRSupercarrier.CrewScripts
       set
       {
         _alignmentState = value;
+        OnStateChanged?.Invoke(value);
         logger.Log("New state: " + value);
       }
     }
@@ -83,11 +87,13 @@ namespace VTOLVRSupercarrier.CrewScripts
       logger.Log(state);
       logger.Log(vehicle);
       VehicleMaster vm = other.gameObject.GetComponentInParent<VehicleMaster>();
-      if (vm && vehicle == null && state == AlignmentState.None)
+      VehicleMaster localPlayer = VTAPI.GetPlayersVehicleGameObject().GetComponent<VehicleMaster>();
+      if (vm && vm == localPlayer && vehicle == null && state == AlignmentState.None)
       {
         player = vm.gameObject.AddComponent<ManagedCatapult>();
         player.manager = this;
-        StartAlign(other.gameObject.GetComponentInParent<VehicleMaster>());
+        OnStartAlign?.Invoke(vm);
+        StartAlign(vm);
       }
     }
 
@@ -224,16 +230,51 @@ namespace VTOLVRSupercarrier.CrewScripts
 
     public void ResetTrigger()
     {
-      if (state != AlignmentState.None)
+      logger.Log("reset");
+      player = null;
+      if (routine != null)
       {
-        logger.Log("reset");
-        player = null;
-        if (routine != null)
-        {
-          StopCoroutine(routine);
-        }
-        state = AlignmentState.None;
-        Reset?.Invoke();
+        StopCoroutine(routine);
+      }
+      state = AlignmentState.None;
+      Reset?.Invoke();
+    }
+
+    public void SyncState(AlignmentState serverState)
+    {
+      if (serverState == state || state == AlignmentState.None)
+        return;
+
+      switch (serverState)
+      {
+        case AlignmentState.None:
+          ResetTrigger();
+          break;
+        case AlignmentState.Taxi:
+          // Currently needs to be invoked by collider to properly start alignment sequence
+          // OnTaxi?.Invoke();
+          break;
+        case AlignmentState.LaunchBar:
+          OnLaunchBar?.Invoke();
+          break;
+        case AlignmentState.Wings:
+          OnWings?.Invoke();
+          break;
+        case AlignmentState.Hook:
+          OnHook?.Invoke();
+          break;
+        case AlignmentState.LaunchReady:
+          OnLaunchReady?.Invoke();
+          break;
+        case AlignmentState.Runup:
+          OnRunup?.Invoke();
+          break;
+        case AlignmentState.Launch:
+          OnLaunch?.Invoke();
+          break;
+        case AlignmentState.Landing:
+          LandingTrigger();
+          break;
       }
     }
   }

@@ -5,34 +5,53 @@ namespace VTOLVRSupercarrier.CrewScripts
   class CrewSync : VTNetSyncRPCOnly
   {
     CatapultCrewManager _crewManager;
+
     public override void OnNetInitialized()
     {
       _crewManager = GetComponent<CatapultCrewManager>();
       if (!isMine)
         return;
-      _crewManager.OnLanding += Landing;
-      _crewManager.Reset += Reset;
+      _crewManager.OnStateChanged += OnStateChanged;
+      _crewManager.OnStartAlign += OnStartAlign;
     }
 
-    public void Landing()
+    void OnStateChanged(AlignmentState state)
     {
-      SendRPC("RPC_CarrierCrewSyncLanding", 1);
+      SendRPC("RPC_CarrierCrewSyncState", state);
     }
 
-    public void Reset()
+    void OnStartAlign(VehicleMaster vm)
     {
-      SendRPC("RPC_CarrierCrewSyncLanding", 0);
+      SendRPC("RPC_CarrierCrewSyncAlign", vm);
     }
 
     [VTRPC]
-    public void RPC_CarrierCrewSyncLanding(int state)
+    public void RPC_CarrierCrewSyncState(AlignmentState state)
     {
-      if (state == 1)
+      _crewManager.SyncState(state);
+      /*switch (state) 
       {
-        _crewManager.LandingTrigger();
-        return;
-      }
-      _crewManager.ResetTrigger();
+        case AlignmentState.None:
+          _crewManager.ResetTrigger();
+          break;
+        case AlignmentState.Landing:
+          _crewManager.LandingTrigger();
+          break;
+        case AlignmentState.Taxi:
+        case AlignmentState.LaunchBar:
+        case AlignmentState.Wings:
+        case AlignmentState.Hook:
+        case AlignmentState.LaunchReady:
+        case AlignmentState.Runup:
+        case AlignmentState.Launch:
+          _crewManager.SyncState(state);
+          break;
+      }*/
+    }
+    [VTRPC]
+    public void RPC_CarrierCrewSyncAlign(VehicleMaster vm)
+    {
+      _crewManager.StartAlign(vm);
     }
   }
 }
