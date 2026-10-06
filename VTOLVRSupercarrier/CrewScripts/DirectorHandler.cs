@@ -15,6 +15,7 @@ namespace VTOLVRSupercarrier.CrewScripts
     public Transform landingPoint;
 
     private bool isIdle = true;
+    private WheelsController wheelsController;
 
     public override void OnEnable()
     {
@@ -127,6 +128,32 @@ namespace VTOLVRSupercarrier.CrewScripts
       {
         anim.SetFloat("alignBlend", 0, 0.3f, Time.deltaTime);
       }
+    }
+
+    /**
+     * Function for getting the position of the alignment point for the current aircraft.
+     * This will try to return the nose wheel but returns the centre of mass if that fails.
+     */
+    private Vector3 GetAlignmentPoint()
+    {
+      if (wheelsController == null)
+      {
+        wheelsController = catapultManager.vehicle.GetComponentInChildren<WheelsController>(true);
+      }
+
+      if (wheelsController != null && 
+          wheelsController.suspensions != null &&
+          wheelsController.steeringSuspensionIndex >= 0 &&
+          wheelsController.steeringSuspensionIndex < wheelsController.suspensions.Length)
+      {
+        RaySpringDamper noseWheel = wheelsController.suspensions[wheelsController.steeringSuspensionIndex];
+        if (noseWheel != null)
+        {
+          return noseWheel.isTouching ? noseWheel.point : noseWheel.transform.position;
+        }
+      }
+
+      return catapultManager.planeCOM.position;
     }
 
     private void ResetAnimVars()
