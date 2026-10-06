@@ -16,6 +16,8 @@ namespace VTOLVRSupercarrier
   [ItemId("the_faulty-supercarrier")]
   public class Main : VtolMod
   {
+    public static bool DEBUG = false;
+    
     private bool patched = false;
     private bool isLoaded = false;
     private string ModFolder;
