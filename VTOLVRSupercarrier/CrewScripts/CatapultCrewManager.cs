@@ -103,6 +103,8 @@ namespace VTOLVRSupercarrier.CrewScripts
       if (mc && mc == player && mc.manager == this)
       {
         Destroy(player);
+        if (Main.DEBUG)
+          logger.Log("Trigger Exit - reset");
         ResetTrigger();
       }
     }
@@ -191,7 +193,8 @@ namespace VTOLVRSupercarrier.CrewScripts
             yield return new WaitForSeconds(10);
             state = AlignmentState.None;
             vehicle = null;
-            logger.Log("reset");
+            if (Main.DEBUG)
+              logger.Log("reset - launch");
             Reset?.Invoke();
             break;
         }
@@ -225,12 +228,16 @@ namespace VTOLVRSupercarrier.CrewScripts
       {
         yield return new WaitForSeconds(2);
       }
+
+      if (Main.DEBUG)
+        logger.Log("landing reset");
       ResetTrigger();
     }
 
     public void ResetTrigger()
     {
-      logger.Log("reset");
+      if (Main.DEBUG)
+        logger.Log("resetTrigger");
       player = null;
       if (routine != null)
       {
@@ -248,6 +255,8 @@ namespace VTOLVRSupercarrier.CrewScripts
       switch (serverState)
       {
         case AlignmentState.None:
+          if (Main.DEBUG)
+            logger.Log("NONE - reset");
           ResetTrigger();
           break;
         case AlignmentState.Taxi:
