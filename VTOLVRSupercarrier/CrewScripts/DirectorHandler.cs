@@ -17,6 +17,7 @@ namespace VTOLVRSupercarrier.CrewScripts
     private bool isIdle = true;
     private LineRenderer alignLine;
     private TextMesh alignAngleText;
+    private VehicleMaster wheelsVehicle;
     private WheelsController wheelsController;
 
     public override void OnEnable()
@@ -208,9 +209,11 @@ namespace VTOLVRSupercarrier.CrewScripts
      */
     private Vector3 GetAlignmentPoint()
     {
-      if (wheelsController == null)
+      VehicleMaster vehicle = catapultManager.vehicle;
+      if (wheelsVehicle != vehicle || wheelsController == null)
       {
-        wheelsController = catapultManager.vehicle.GetComponentInChildren<WheelsController>(true);
+        wheelsVehicle = vehicle;
+        wheelsController = vehicle.GetComponentInChildren<WheelsController>(true);
       }
 
       if (wheelsController != null && 
