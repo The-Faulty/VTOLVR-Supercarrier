@@ -5,19 +5,23 @@
     <OutputType>Library</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <VtolVrDirectory Condition="'$(VtolVrDirectory)' == ''">C:\Program Files (x86)\Steam\steamapps\common\VTOL VR</VtolVrDirectory>
+    <VtolVrManagedDirectory>$(VtolVrDirectory)\VTOLVR_Data\Managed</VtolVrManagedDirectory>
+    <ModLoaderManagedDirectory Condition="Exists('$(VtolVrDirectory)\Managed\ModLoader.Framework.dll')">$(VtolVrDirectory)\Managed</ModLoaderManagedDirectory>
+    <ModLoaderManagedDirectory Condition="'$(ModLoaderManagedDirectory)' == ''">$(VtolVrDirectory)\@Mod Loader\Managed</ModLoaderManagedDirectory>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\VTOL VR\@Mod Loader\Managed\0Harmony.dll</HintPath>
+      <HintPath>$(ModLoaderManagedDirectory)\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp" Publicize="true">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(VtolVrManagedDirectory)\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Mod Loader" Publicize="true">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VTOL VR\@Mod Loader\Managed\Mod Loader.dll</HintPath>
+      <HintPath>$(ModLoaderManagedDirectory)\Mod Loader.dll</HintPath>
     </Reference>
     <Reference Include="ModLoader.Framework" Publicize="true">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\VTOL VR\@Mod Loader\Managed\ModLoader.Framework.dll</HintPath>
+      <HintPath>$(ModLoaderManagedDirectory)\ModLoader.Framework.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -30,19 +34,19 @@
       <HintPath>..\Dependencies\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>$(VtolVrManagedDirectory)\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\Dependencies\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>$(VtolVrManagedDirectory)\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\Dependencies\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>$(VtolVrManagedDirectory)\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="VTOLAPI">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\workshop\content\3018410\3265689427\VTOLAPI.dll</HintPath>
