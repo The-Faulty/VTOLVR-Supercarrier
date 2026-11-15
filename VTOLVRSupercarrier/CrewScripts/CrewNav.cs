@@ -12,7 +12,8 @@ namespace VTOLVRSupercarrier.CrewScripts
     public float WalkSpeed = 1.5f;
     public float BackupSpeed = 1f;
 
-    private bool isMoving = false;
+    private const float MaxStartDelay = 0.15f;
+    private Coroutine moveToDestination;
 
     void OnEnable()
     {
@@ -27,7 +28,10 @@ namespace VTOLVRSupercarrier.CrewScripts
 
     public void SetDestination(Vector3 pos)
     {
-      StartCoroutine(MoveToAsync(pos));
+      if (moveToDestination != null)
+        StopCoroutine(moveToDestination);
+
+      moveToDestination = StartCoroutine(MoveToAsync(pos));
     }
 
     private IEnumerator MoveToAsync(Vector3 pos)
@@ -42,6 +46,8 @@ namespace VTOLVRSupercarrier.CrewScripts
       float distance = Vector3.Distance(startPos, pos);
       remainingDistance = distance;
 
+      if (distance > 0.2f && anim.GetFloat("walkBlend") == 0f)
+        yield return new WaitForSeconds(Random.Range(0f, MaxStartDelay));
 
       while (remainingDistance > 0.00001f)
       {
